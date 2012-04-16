@@ -1,8 +1,11 @@
-#include "wrapper.h"
+#include "panel.h"
 #include "SPI.h"
 
-#define DATA_PIN 0
-#define CLOCK_PIN 1
+#define DATA_PIN_A 0
+#define CLOCK_PIN_A 1
+#define DATA_PIN_B 8
+#define CLOCK_PIN_B 9
+
 #define COLUMN_SIZE 26
 #define ROW_COUNT 6
 
@@ -10,35 +13,46 @@
 
 /*****************************************************************************/
 
-LPD8806 * strip = new LPD8806(156, DATA_PIN, CLOCK_PIN);
-StripWrapper wrapper(COLUMN_SIZE, ROW_COUNT, strip);
+LPD8806 * strip_a = new LPD8806(156, DATA_PIN_A, CLOCK_PIN_A);
+LPD8806 * strip_b = new LPD8806(156, DATA_PIN_B, CLOCK_PIN_B);
+//StripWrapper * wrapper_a = new StripWrapper(COLUMN_SIZE, ROW_COUNT, strip_a);
+//StripWrapper * wrapper_b = new StripWrapper(COLUMN_SIZE, ROW_COUNT, strip_b);
+StripWrapper wrapper_a(COLUMN_SIZE, ROW_COUNT, strip_a);
+StripWrapper wrapper_b(COLUMN_SIZE, ROW_COUNT, strip_b);
+
+StripWrapper wrappers[] = {wrapper_a, wrapper_b};
+
+Panel panel(2, wrappers);
 
 void setup() {
-  wrapper.begin();
+  panel.begin();
+  //wrapper_a.begin();
+  //wrapper_b.begin();
 }
 
 
 void loop() {
-  //for (int y=0; y < 26; y++)
-  //{
-  //  wrapper.setRowColor(y, 127, 127, 127);
-  //  //wrapper.setPixelColor(x, y, 127, 127, 127);
-  //  wrapper.show();
-  //}
-  //for (int y=0; y < 26; y++)
-  //{
-  //  wrapper.setRowColor(y, 0, 0, 0);
-  //  //wrapper.setPixelColor(x, y, 127, 127, 127);
-  //  wrapper.show();
-  //}
-  //for (int x=0; x < 156; x++)
-  //{
-  //    //(*strip).setPixelColor(x, 0, 0, 0);
-  //    (*strip).setPixelColor(x, 127, 127, 127);
-  //    //wrapper.setPixelColor(5, 10, 127, 127, 127);
-  //    (*strip).show();
-  //}
-  rainbow();
+  hard_rainbow();
+}
+
+void hard_rainbow()
+{
+  uint32_t colors[] = {
+    panel.Color(70, 0, 127),
+    panel.Color(0, 0, 127),
+    panel.Color(0, 127, 0),
+    panel.Color(127, 127, 0),
+    panel.Color(127, 32, 0),
+    panel.Color(127, 0, 0),
+  };
+  for(int i=0; i < 6; i++)
+  {
+    for(int r=i * COLUMN_SIZE / 6; r < (i+1) * COLUMN_SIZE / 6; r++)
+    {
+      panel.setRowColor(r, colors[i]);
+    }
+  }
+  panel.show();
 }
 
 void rainbow()
@@ -48,10 +62,9 @@ void rainbow()
   {
     for(i=0; i < 26; i++)
     {
-      wrapper.setRowColor(i, Wheel( (i * 384 / 26 + j) % 384) );
+      panel.setRowColor(i, Wheel( (i * 384 / 26 + j) % 384) );
     }
-    wrapper.show();
-    //delay(10);
+    panel.show();
   }
 }
 
@@ -81,5 +94,5 @@ uint32_t Wheel(uint16_t WheelPos)
       g = 0;                  //green off
       break; 
   }
-  return((*strip).Color(r,g,b));
+  return((*strip_a).Color(r,g,b));
 }

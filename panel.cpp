@@ -12,6 +12,7 @@ Panel::Panel(uint8_t c, StripWrapper * w) {
   }
 }
 
+
 /*
  *  UTILITY METHODS
  */
