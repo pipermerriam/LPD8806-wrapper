@@ -9,14 +9,14 @@
 #define COLUMN_SIZE 26
 #define ROW_COUNT 6
 
+int STRIPES[6] = {5, 4, 4, 4, 4, 5};
+
 // Example to control LPD8806-based RGB LED Modules in a strip
 
 /*****************************************************************************/
 
 LPD8806 * strip_a = new LPD8806(156, DATA_PIN_A, CLOCK_PIN_A);
 LPD8806 * strip_b = new LPD8806(156, DATA_PIN_B, CLOCK_PIN_B);
-//StripWrapper * wrapper_a = new StripWrapper(COLUMN_SIZE, ROW_COUNT, strip_a);
-//StripWrapper * wrapper_b = new StripWrapper(COLUMN_SIZE, ROW_COUNT, strip_b);
 StripWrapper wrapper_a(COLUMN_SIZE, ROW_COUNT, strip_a);
 StripWrapper wrapper_b(COLUMN_SIZE, ROW_COUNT, strip_b);
 
@@ -24,33 +24,47 @@ StripWrapper wrappers[] = {wrapper_a, wrapper_b};
 
 Panel panel(2, wrappers);
 
+// PRIMARY COLORS
+uint32_t RED = panel.Color(127, 0, 0);
+uint32_t ORANGE = panel.Color(127, 32, 0); // Could use some tweaking
+uint32_t YELLOW = panel.Color(127, 127, 0);
+uint32_t GREEN = panel.Color(0, 127, 0);
+uint32_t BLUE = panel.Color(0, 0, 127);
+uint32_t PURPLE = panel.Color(64, 16, 100); // Could use some tweaking
+
+// PIMARY COLORED RAINBOW
+uint32_t RAINBOW[] = {RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE};
+
 void setup() {
   panel.begin();
-  //wrapper_a.begin();
-  //wrapper_b.begin();
 }
 
 
 void loop() {
+  //multi_rainbow();
   hard_rainbow();
+}
+
+void multi_rainbow()
+{
+  for(int r=0; r < COLUMN_SIZE; r++)
+  {
+    panel.setRowColor(r, RAINBOW[r%6]);
+  }
 }
 
 void hard_rainbow()
 {
-  uint32_t colors[] = {
-    panel.Color(70, 0, 127),
-    panel.Color(0, 0, 127),
-    panel.Color(0, 127, 0),
-    panel.Color(127, 127, 0),
-    panel.Color(127, 32, 0),
-    panel.Color(127, 0, 0),
-  };
+  int left = 0;
+  int right = 0;
   for(int i=0; i < 6; i++)
   {
-    for(int r=i * COLUMN_SIZE / 6; r < (i+1) * COLUMN_SIZE / 6; r++)
+    right += STRIPES[i];
+    for(int r=left; r < right; r++)
     {
-      panel.setRowColor(r, colors[i]);
+      panel.setRowColor(r, RAINBOW[i]);
     }
+    left = right;
   }
   panel.show();
 }
@@ -60,9 +74,9 @@ void rainbow()
   int i, j;
   for(j=0; j < 384 * 5; j++)
   {
-    for(i=0; i < 26; i++)
+    for(i=0; i < COLUMN_SIZE; i++)
     {
-      panel.setRowColor(i, Wheel( (i * 384 / 26 + j) % 384) );
+      panel.setRowColor(i, Wheel( (i * 384 / COLUMN_SIZE + j) % 384) );
     }
     panel.show();
   }
