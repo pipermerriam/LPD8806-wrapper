@@ -9,7 +9,6 @@ StripWrapper::StripWrapper(uint8_t r, uint8_t c, LPD8806 * s) {
   row_count = r;
   column_count = c;
   strip = s;
-
 }
 
 /*
@@ -49,6 +48,10 @@ void StripWrapper::show(void) {
  */
 int StripWrapper::columns(void) {
   return column_count;
+}
+
+int StripWrapper::rows(void) {
+  return row_count;
 }
 
 int StripWrapper::pixels(void) {

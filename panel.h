@@ -3,9 +3,15 @@
 class Panel {
   public:
     Panel(uint8_t c, StripWrapper * w);
+    int
+      columns(void),
+      rows(void),
+      pixels(void);
     void
       begin(void),
       show(void),
+      setBoxColor(uint16_t left, uint16_t right, uint16_t top, uint16_t bottom, uint8_t r, uint8_t g, uint8_t b),
+      setBoxColor(uint16_t left, uint16_t right, uint16_t top, uint16_t bottom, uint32_t c),
       setRowColor(uint8_t y, uint8_t r, uint8_t g, uint8_t b),
       setRowColor(uint8_t y, uint32_t c),
       setColumnColor(uint16_t x, uint8_t r, uint8_t g, uint8_t b),
@@ -19,6 +25,8 @@ class Panel {
   private:
     StripWrapper * wrappers;
     int
-      strip_count;
-    int * columns;
+      strip_count,
+      column_count,
+      row_count;
+    int * column_starts;
 };

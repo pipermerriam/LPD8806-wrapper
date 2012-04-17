@@ -7,9 +7,11 @@ Panel::Panel(uint8_t c, StripWrapper * w) {
   int column = 0;
   for (int i=0; i < strip_count; i++)
   {
-    columns[i] = column;
+    column_starts[i] = column;
     column += wrappers[i].columns();
   }
+  column_count = column;
+  row_count = wrappers[i].rows();
 }
 
 
@@ -28,7 +30,7 @@ uint16_t Panel::column_to_strip(uint16_t x) {
   // contains that corrdinate
   for (int i=0; i < strip_count; i ++)
   {
-    if ( x < columns[i] + wrappers[i].columns() )
+    if ( x < column_starts[i] + wrappers[i].columns() )
     {
       return i;
     }
@@ -54,6 +56,39 @@ void Panel::show(void) {
 }
 
 /*
+ *  INFO METHODS
+ */
+int Panel::columns(void) {
+  return column_count;
+}
+
+int Panel::rows(void) {
+  return row_count;
+}
+
+int Panel::pixels(void) {
+  return row_count * column_count;
+}
+
+/*
+ *  BOX SETTER
+ */
+void Panel::setBoxColor(uint16_t left, uint16_t right, uint16_t top, uint16_t bottom, uint8_t r, uint8_t g, uint8_t b) {
+  setBoxColor(left, right, top, bottom, Color(r, g, b));
+}
+
+void Panel::setBoxColor(uint16_t left, uint16_t right, uint16_t top, uint16_t bottom, uint32_t c) {
+  ///Colors a box bounded by coordinates left, right, top, bottom (inclusive)
+  for (int x=left; x <= right; x++)
+  {
+    for (int y=bottom; y <= top; y++)
+    {
+      setPixelColor(x, y, c);
+    }
+  }
+}
+
+/*
  *   COLUMN AND ROW SETTERS
  */
 void Panel::setColumnColor(uint16_t x, uint8_t r, uint8_t g, uint8_t b) {
@@ -62,7 +97,7 @@ void Panel::setColumnColor(uint16_t x, uint8_t r, uint8_t g, uint8_t b) {
 
 void Panel::setColumnColor(uint16_t x, uint32_t c) {
   int index = column_to_strip(x);
-  int strip_x = x - columns[index];
+  int strip_x = x - column_starts[index];
   wrappers[index].setColumnColor(strip_x, c);
   //wrappers[index].setColumnColor(strip_x, c);
 }
@@ -87,6 +122,6 @@ void Panel::setPixelColor(uint16_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b
 
 void Panel::setPixelColor(uint16_t x, uint8_t y, uint32_t c) {
   int index = column_to_strip(x);
-  int strip_x = x - columns[index];
+  int strip_x = x - column_starts[index];
   wrappers[index].setPixelColor(strip_x, y, c);
 }
