@@ -11,7 +11,7 @@ Panel::Panel(uint8_t c, StripWrapper * w) {
     column += wrappers[i].columns();
   }
   column_count = column;
-  row_count = wrappers[i].rows();
+  row_count = wrappers[0].rows();
 }
 
 

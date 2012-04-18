@@ -1,10 +1,14 @@
 #include "panel.h"
 #include "SPI.h"
 
-#define DATA_PIN_A 0
-#define CLOCK_PIN_A 1
-#define DATA_PIN_B 8
-#define CLOCK_PIN_B 9
+//#define DATA_PIN_A 0
+//#define CLOCK_PIN_A 1
+#define DATA_PIN_B 2
+#define CLOCK_PIN_B 3
+#define DATA_PIN_C 4
+#define CLOCK_PIN_C 5
+#define DATA_PIN_D 6
+#define CLOCK_PIN_D 7
 
 #define COLUMN_SIZE 26
 #define ROW_COUNT 6
@@ -17,12 +21,16 @@ int STRIPES[6] = {5, 4, 4, 4, 4, 5};
 
 LPD8806 * strip_a = new LPD8806(156, DATA_PIN_A, CLOCK_PIN_A);
 LPD8806 * strip_b = new LPD8806(156, DATA_PIN_B, CLOCK_PIN_B);
+LPD8806 * strip_c = new LPD8806(156, DATA_PIN_C, CLOCK_PIN_C);
+LPD8806 * strip_d = new LPD8806(156, DATA_PIN_D, CLOCK_PIN_D);
 StripWrapper wrapper_a(COLUMN_SIZE, ROW_COUNT, strip_a);
 StripWrapper wrapper_b(COLUMN_SIZE, ROW_COUNT, strip_b);
+StripWrapper wrapper_c(COLUMN_SIZE, ROW_COUNT, strip_c);
+StripWrapper wrapper_d(COLUMN_SIZE, ROW_COUNT, strip_d);
 
-StripWrapper wrappers[] = {wrapper_a, wrapper_b};
+StripWrapper wrappers[] = {wrapper_a, wrapper_b, wrapper_c, wrapper_d};
 
-Panel panel(2, wrappers);
+Panel panel(4, wrappers);
 
 // PRIMARY COLORS
 uint32_t RED = panel.Color(127, 0, 0);
