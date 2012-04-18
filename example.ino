@@ -1,36 +1,38 @@
 #include "panel.h"
 #include "SPI.h"
 
-//#define DATA_PIN_A 0
-//#define CLOCK_PIN_A 1
-#define DATA_PIN_B 2
-#define CLOCK_PIN_B 3
-#define DATA_PIN_C 4
-#define CLOCK_PIN_C 5
-#define DATA_PIN_D 6
-#define CLOCK_PIN_D 7
+#define DATA_PIN_A 0
+#define CLOCK_PIN_A 1
+#define DATA_PIN_B 4
+#define CLOCK_PIN_B 5
+#define DATA_PIN_C 6
+#define CLOCK_PIN_C 7
+//#define DATA_PIN_D 6
+//#define CLOCK_PIN_D 7
 
-#define COLUMN_SIZE 26
-#define ROW_COUNT 6
+#define COLUMN_COUNT 26
+#define ROW_COUNT 8
 
 int STRIPES[6] = {5, 4, 4, 4, 4, 5};
 
-// Example to control LPD8806-based RGB LED Modules in a strip
+LPD8806 * strip_a = new LPD8806(208, DATA_PIN_A, CLOCK_PIN_A);
+StripWrapper wrapper_a(COLUMN_COUNT, ROW_COUNT, strip_a);
+LPD8806 * strip_b = new LPD8806(208, DATA_PIN_B, CLOCK_PIN_B);
+StripWrapper wrapper_b(COLUMN_COUNT, ROW_COUNT, strip_b);
+LPD8806 * strip_c = new LPD8806(182, DATA_PIN_C, CLOCK_PIN_C);
+StripWrapper wrapper_c(COLUMN_COUNT, 7, strip_c);
+//LPD8806 * strip_d = new LPD8806(156, DATA_PIN_D, CLOCK_PIN_D);
+//StripWrapper wrapper_d(COLUMN_COUNT, ROW_COUNT, strip_d);
 
-/*****************************************************************************/
+StripWrapper wrappers[] = {wrapper_a, wrapper_b, wrapper_c};
+//StripWrapper wrappers[] = {wrapper_a, wrapper_c, wrapper_d};
 
-LPD8806 * strip_a = new LPD8806(156, DATA_PIN_A, CLOCK_PIN_A);
-LPD8806 * strip_b = new LPD8806(156, DATA_PIN_B, CLOCK_PIN_B);
-LPD8806 * strip_c = new LPD8806(156, DATA_PIN_C, CLOCK_PIN_C);
-LPD8806 * strip_d = new LPD8806(156, DATA_PIN_D, CLOCK_PIN_D);
-StripWrapper wrapper_a(COLUMN_SIZE, ROW_COUNT, strip_a);
-StripWrapper wrapper_b(COLUMN_SIZE, ROW_COUNT, strip_b);
-StripWrapper wrapper_c(COLUMN_SIZE, ROW_COUNT, strip_c);
-StripWrapper wrapper_d(COLUMN_SIZE, ROW_COUNT, strip_d);
+//Panel panel(4, wrappers);
+Panel panel(3, wrappers);
 
-StripWrapper wrappers[] = {wrapper_a, wrapper_b, wrapper_c, wrapper_d};
-
-Panel panel(4, wrappers);
+// OTHER COLORS
+uint32_t ALL_OFF = panel.Color(0, 0, 0);
+uint32_t ALL_ON = panel.Color(127, 127, 127);
 
 // PRIMARY COLORS
 uint32_t RED = panel.Color(127, 0, 0);
@@ -49,13 +51,29 @@ void setup() {
 
 
 void loop() {
+  pixel_test(GREEN);
+  pixel_test(RED);
+  pixel_test(BLUE);
   //multi_rainbow();
-  hard_rainbow();
+  //hard_rainbow();
+  //rainbow();
+}
+
+void pixel_test(uint32_t color)
+{
+  for(int y=0; y < 26; y++)
+  {
+    for(int x=0; x < 23; x++)
+    {
+      panel.setPixelColor(x, y, color);
+      panel.show();
+    }
+  }
 }
 
 void multi_rainbow()
 {
-  for(int r=0; r < COLUMN_SIZE; r++)
+  for(int r=0; r < COLUMN_COUNT; r++)
   {
     panel.setRowColor(r, RAINBOW[r%6]);
   }
@@ -82,9 +100,9 @@ void rainbow()
   int i, j;
   for(j=0; j < 384 * 5; j++)
   {
-    for(i=0; i < COLUMN_SIZE; i++)
+    for(i=0; i < COLUMN_COUNT; i++)
     {
-      panel.setRowColor(i, Wheel( (i * 384 / COLUMN_SIZE + j) % 384) );
+      panel.setRowColor(i, Wheel( (i * 384 / COLUMN_COUNT + j) % 384) );
     }
     panel.show();
   }
@@ -116,5 +134,5 @@ uint32_t Wheel(uint16_t WheelPos)
       g = 0;                  //green off
       break; 
   }
-  return((*strip_a).Color(r,g,b));
+  return(panel.Color(r,g,b));
 }
