@@ -13,7 +13,7 @@
 #define COLUMN_COUNT 26
 #define ROW_COUNT 8
 
-int STRIPES[6] = {5, 4, 4, 4, 4, 5};
+uint8_t STRIPES[6] = {5, 4, 4, 4, 4, 5};
 
 LPD8806 * strip_a = new LPD8806(208, DATA_PIN_A, CLOCK_PIN_A);
 StripWrapper wrapper_a(COLUMN_COUNT, ROW_COUNT, strip_a);
@@ -31,19 +31,27 @@ StripWrapper wrappers[] = {wrapper_a, wrapper_b, wrapper_c};
 Panel panel(3, wrappers);
 
 // OTHER COLORS
-uint32_t ALL_OFF = panel.Color(0, 0, 0);
-uint32_t ALL_ON = panel.Color(127, 127, 127);
+#define ALL_OFF 0x000000
+//prog_uint32_t ALL_OFF = panel.Color(0, 0, 0);
+#define ALL_ON 0x7f7f7f
+//prog_uint32_t ALL_ON = panel.Color(127, 127, 127);
 
 // PRIMARY COLORS
-uint32_t RED = panel.Color(127, 0, 0);
-uint32_t ORANGE = panel.Color(127, 32, 0); // Could use some tweaking
-uint32_t YELLOW = panel.Color(127, 127, 0);
-uint32_t GREEN = panel.Color(0, 127, 0);
-uint32_t BLUE = panel.Color(0, 0, 127);
-uint32_t PURPLE = panel.Color(64, 16, 100); // Could use some tweaking
+#define RED 0x7f0000
+//uint32_t RED = panel.Color(127, 0, 0);
+#define ORANGE 0x7f2000
+//uint32_t ORANGE = panel.Color(127, 32, 0); // Could use some tweaking
+#define YELLOW 0x7f7f00
+//uint32_t YELLOW = panel.Color(127, 127, 0);
+#define GREEN 0x007f00
+//uint32_t GREEN = panel.Color(0, 127, 0);
+#define BLUE 0x00007f
+//uint32_t BLUE = panel.Color(0, 0, 127);
+#define PURPLE 0x40107f
+//uint32_t PURPLE = panel.Color(64, 16, 100); // Could use some tweaking
 
 // PIMARY COLORED RAINBOW
-uint32_t RAINBOW[] = {RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE};
+prog_uint32_t RAINBOW[] = {RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE};
 
 void setup() {
   panel.begin();
@@ -61,9 +69,9 @@ void loop() {
 
 void pixel_test(uint32_t color)
 {
-  for(int y=0; y < 26; y++)
+  for(uint8_t y=0; y < 26; y++)
   {
-    for(int x=0; x < 23; x++)
+    for(uint8_t x=0; x < 23; x++)
     {
       panel.setPixelColor(x, y, color);
       panel.show();
@@ -73,7 +81,7 @@ void pixel_test(uint32_t color)
 
 void multi_rainbow()
 {
-  for(int r=0; r < COLUMN_COUNT; r++)
+  for(uint8_t r=0; r < COLUMN_COUNT; r++)
   {
     panel.setRowColor(r, RAINBOW[r%6]);
   }
@@ -81,12 +89,12 @@ void multi_rainbow()
 
 void hard_rainbow()
 {
-  int left = 0;
-  int right = 0;
-  for(int i=0; i < 6; i++)
+  uint8_t left = 0;
+  uint8_t right = 0;
+  for(uint8_t i=0; i < 6; i++)
   {
     right += STRIPES[i];
-    for(int r=left; r < right; r++)
+    for(uint8_t r=left; r < right; r++)
     {
       panel.setRowColor(r, RAINBOW[i]);
     }
@@ -97,7 +105,7 @@ void hard_rainbow()
 
 void rainbow()
 {
-  int i, j;
+  uint8_t i, j;
   for(j=0; j < 384 * 5; j++)
   {
     for(i=0; i < COLUMN_COUNT; i++)

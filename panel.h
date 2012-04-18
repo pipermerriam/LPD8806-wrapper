@@ -5,8 +5,6 @@ class Panel {
     Panel(uint8_t c, StripWrapper * w);
     int
       columns(void),
-      rows(void),
-      pixels(void);
     void
       begin(void),
       show(void),
@@ -27,6 +25,5 @@ class Panel {
     int
       strip_count,
       column_count,
-      row_count;
     int * column_starts;
 };
