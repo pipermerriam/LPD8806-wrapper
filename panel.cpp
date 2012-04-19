@@ -27,8 +27,6 @@ uint32_t Panel::Color(byte r, byte g, byte b) {
 uint16_t Panel::column_to_strip(uint16_t x) {
   // Takes a cartesian x, y coordinate and returns the strip wrapper which
   // contains that corrdinate
-  if (x < 78) { return 0; }
-  return 1;
   for (int i=0; i < strip_count; i ++)
   {
     if ( x < column_starts[i] + wrappers[i].columns() )

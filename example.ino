@@ -3,12 +3,12 @@
 
 #define DATA_PIN_A 2
 #define CLOCK_PIN_A 3
-//#define DATA_PIN_B 4
-//#define CLOCK_PIN_B 5
-//#define DATA_PIN_C 6
-//#define CLOCK_PIN_C 7
-//#define DATA_PIN_D 6
-//#define CLOCK_PIN_D 7
+#define DATA_PIN_B 4
+#define CLOCK_PIN_B 5
+#define DATA_PIN_C 6
+#define CLOCK_PIN_C 7
+#define DATA_PIN_D 6
+#define CLOCK_PIN_D 7
 
 #define COLUMN_COUNT 2
 #define ROW_COUNT 78
@@ -17,18 +17,16 @@ uint8_t STRIPES[6] = {5, 4, 4, 4, 4, 5};
 
 LPD8806 * strip_a = new LPD8806(156, DATA_PIN_A, CLOCK_PIN_A);
 StripWrapper wrapper_a(ROW_COUNT, COLUMN_COUNT, strip_a);
-//LPD8806 * strip_b = new LPD8806(208, DATA_PIN_B, CLOCK_PIN_B);
-//StripWrapper wrapper_b(COLUMN_COUNT, ROW_COUNT, strip_b);
-//LPD8806 * strip_c = new LPD8806(182, DATA_PIN_C, CLOCK_PIN_C);
-//StripWrapper wrapper_c(COLUMN_COUNT, 7, strip_c);
-//LPD8806 * strip_d = new LPD8806(156, DATA_PIN_D, CLOCK_PIN_D);
-//StripWrapper wrapper_d(COLUMN_COUNT, ROW_COUNT, strip_d);
+LPD8806 * strip_b = new LPD8806(208, DATA_PIN_B, CLOCK_PIN_B);
+StripWrapper wrapper_b(COLUMN_COUNT, ROW_COUNT, strip_b);
+LPD8806 * strip_c = new LPD8806(182, DATA_PIN_C, CLOCK_PIN_C);
+StripWrapper wrapper_c(COLUMN_COUNT, 7, strip_c);
+LPD8806 * strip_d = new LPD8806(156, DATA_PIN_D, CLOCK_PIN_D);
+StripWrapper wrapper_d(COLUMN_COUNT, ROW_COUNT, strip_d);
 
-StripWrapper wrappers[] = {wrapper_a};
-//StripWrapper wrappers[] = {wrapper_a, wrapper_c, wrapper_d};
+StripWrapper wrappers[] = {wrapper_a, wrapper_c, wrapper_d};
 
-//Panel panel(4, wrappers);
-Panel panel(1, wrappers);
+Panel panel(4, wrappers);
 
 // OTHER COLORS
 //#define ALL_OFF 0x000000
