@@ -4,7 +4,7 @@ class Panel {
   public:
     Panel(uint8_t c, StripWrapper * w);
     int
-      columns(void),
+      columns(void);
     void
       begin(void),
       show(void),
@@ -24,6 +24,6 @@ class Panel {
     StripWrapper * wrappers;
     int
       strip_count,
-      column_count,
+      column_count;
     int * column_starts;
 };

@@ -27,9 +27,8 @@ uint32_t Panel::Color(byte r, byte g, byte b) {
 uint16_t Panel::column_to_strip(uint16_t x) {
   // Takes a cartesian x, y coordinate and returns the strip wrapper which
   // contains that corrdinate
-  if ( x >= 16 ) { return 2; }
-  if ( x >= 8 ) { return 1; }
-  return 0;
+  if (x < 78) { return 0; }
+  return 1;
   for (int i=0; i < strip_count; i ++)
   {
     if ( x < column_starts[i] + wrappers[i].columns() )
@@ -93,7 +92,6 @@ void Panel::setColumnColor(uint16_t x, uint32_t c) {
   uint8_t index = column_to_strip(x);
   uint8_t strip_x = x - column_starts[index];
   wrappers[index].setColumnColor(strip_x, c);
-  //wrappers[index].setColumnColor(strip_x, c);
 }
 
 void Panel::setRowColor(uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
