@@ -25,11 +25,11 @@ int StripWrapper::cartesian_to_pixel(const uint16_t x, const uint16_t y) const {
     //bool reverse = y % 2;
 
     if ( reverse ) {
-      return (x * row_size + (row_size - y - 1));
+      return (x * column_size + (column_size - y - 1));
       //return (y * column_size + (column_size - x - 1));
     }
     else {
-      return (x * row_size + y);
+      return (x * column_size + y);
       //return (y * column_size + x);
     }
 }
