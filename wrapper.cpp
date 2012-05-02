@@ -21,16 +21,16 @@ uint32_t StripWrapper::Color(const byte r, const byte g, const byte b) const {
 }
 
 int StripWrapper::cartesian_to_pixel(const uint16_t x, const uint16_t y) const {
-    //bool reverse = x % 2;
-    bool reverse = y % 2;
+    bool reverse = x % 2;
+    //bool reverse = y % 2;
 
     if ( reverse ) {
-      //return (x * row_size + (row_size - y - 1));
-      return (y * column_size + (column_size - x - 1));
+      return (x * row_size + (row_size - y - 1));
+      //return (y * column_size + (column_size - x - 1));
     }
     else {
-      //return (x * row_size + y);
-      return (y * column_size + x);
+      return (x * row_size + y);
+      //return (y * column_size + x);
     }
 }
 
@@ -63,23 +63,23 @@ int StripWrapper::num_pixels() const {
 /*
  *  COLUMN AND ROW SETTERS
  */
-void StripWrapper::setColumnColor(const uint16_t y, const uint8_t r, const uint8_t g, const uint8_t b) {
-  setColumnColor(y, Color(r, g, b));
+void StripWrapper::setColumnColor(const uint16_t x, const uint8_t r, const uint8_t g, const uint8_t b) {
+  setColumnColor(x, Color(r, g, b));
 }
 
-void StripWrapper::setColumnColor(const uint16_t y, const uint32_t c) {
-  for (int x=0; x < column_size; x++)
+void StripWrapper::setColumnColor(const uint16_t x, const uint32_t c) {
+  for (int y=0; y < column_size; y++)
   {
     setPixelColor(x, y, c);
   }
 }
 
-void StripWrapper::setRowColor(const uint8_t x, const uint8_t r, const uint8_t g, const uint8_t b) {
-  setRowColor(x, Color(r, g, b));
+void StripWrapper::setRowColor(const uint8_t y, const uint8_t r, const uint8_t g, const uint8_t b) {
+  setRowColor(y, Color(r, g, b));
 }
 
-void StripWrapper::setRowColor(const uint8_t x, const uint32_t c) {
-  for (int y=0; y < row_size; y++)
+void StripWrapper::setRowColor(const uint8_t y, const uint32_t c) {
+  for (int x=0; x < row_size; x++)
   {
     setPixelColor(x, y, c);
   }

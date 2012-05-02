@@ -82,24 +82,24 @@ void Panel::setBoxColor(uint16_t left, uint16_t right, uint16_t top, uint16_t bo
 /*
  *   COLUMN AND ROW SETTERS
  */
-void Panel::setColumnColor(uint16_t y, uint8_t r, uint8_t g, uint8_t b) {
-  setColumnColor(y, Color(r, g, b));
+void Panel::setColumnColor(uint16_t x, uint8_t r, uint8_t g, uint8_t b) {
+  setColumnColor(x, Color(r, g, b));
 }
 
-void Panel::setColumnColor(uint16_t y, uint32_t c) {
-  uint8_t index = column_to_wrapper(y);
-  uint8_t strip_y = y - column_starts[index];
-  wrappers[index].setColumnColor(strip_y, c);
+void Panel::setColumnColor(uint16_t x, uint32_t c) {
+  uint8_t index = column_to_wrapper(x);
+  uint8_t strip_x = x - column_starts[index];
+  wrappers[index].setColumnColor(strip_x, c);
 }
 
-void Panel::setRowColor(uint8_t x, uint8_t r, uint8_t g, uint8_t b) {
-  setRowColor(x, Color(r, g, b));
+void Panel::setRowColor(uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
+  setRowColor(y, Color(r, g, b));
 }
 
-void Panel::setRowColor(uint8_t x, uint32_t c) {
+void Panel::setRowColor(uint8_t y, uint32_t c) {
   for(uint8_t i=0; i < wrapper_count; i++)
   {
-    wrappers[i].setRowColor(x, c);
+    wrappers[i].setRowColor(y, c);
   }
 }
 

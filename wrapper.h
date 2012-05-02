@@ -16,10 +16,10 @@ class StripWrapper {
     void
       begin(),
       show(),
-      setRowColor(const uint8_t x, const uint8_t r, const uint8_t g, const uint8_t b),
-      setRowColor(const uint8_t x, const uint32_t c),
-      setColumnColor(const uint16_t y, const uint8_t r, const uint8_t g, const uint8_t b),
-      setColumnColor(const uint16_t y, const uint32_t c),
+      setRowColor(const uint8_t y, const uint8_t r, const uint8_t g, const uint8_t b),
+      setRowColor(const uint8_t y, const uint32_t c),
+      setColumnColor(const uint16_t x, const uint8_t r, const uint8_t g, const uint8_t b),
+      setColumnColor(const uint16_t x, const uint32_t c),
       setPixelColor(const uint16_t x, const uint8_t y, const uint8_t r, const uint8_t g, const uint8_t b),
       setPixelColor(const uint16_t x, const uint8_t y, const uint32_t color),
       clearallpixels();
