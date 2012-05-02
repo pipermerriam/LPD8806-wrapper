@@ -2,13 +2,13 @@
 
 /*****************************************************************************/
 Panel::Panel(uint8_t c, StripWrapper * w) {
-  strip_count = c;
+  wrapper_count = c;
   wrappers = w;
   uint16_t column = 0;
-  for (uint8_t i=0; i < strip_count; i++)
+  for (uint8_t i=0; i < wrapper_count; i++)
   {
     column_starts[i] = column;
-    column += wrappers[i].columns();
+    column += wrappers[i].num_columns();
   }
   column_count = column;
 }
@@ -24,12 +24,12 @@ uint32_t Panel::Color(byte r, byte g, byte b) {
   return 0x808080 | ((uint32_t)g << 16) | ((uint32_t)r << 8) | (uint32_t)b;
 }
 
-uint16_t Panel::column_to_strip(uint16_t x) {
-  // Takes a cartesian x, y coordinate and returns the strip wrapper which
+uint16_t Panel::column_to_wrapper(uint16_t y) {
+  // Takes a cartesian x, y coordinate (eas:???) and returns the strip wrapper which
   // contains that corrdinate
-  for (int i=0; i < strip_count; i ++)
+  for (int i=0; i < wrapper_count; i++)
   {
-    if ( x < column_starts[i] + wrappers[i].columns() )
+    if ( y < (column_starts[i] + wrappers[i].num_columns())) // eas: test this with diff-sized wrappers
     {
       return i;
     }
@@ -41,14 +41,14 @@ uint16_t Panel::column_to_strip(uint16_t x) {
  *   BEGIN AND SHOW
  */
 void Panel::begin(void) {
-  for(int i=0; i < strip_count; i++)
+  for(int i=0; i < wrapper_count; i++)
   {
     wrappers[i].begin();
   }
 }
 
 void Panel::show(void) {
-  for(int i=0; i < strip_count; i++)
+  for(int i=0; i < wrapper_count; i++)
   {
     wrappers[i].show();
   }
@@ -82,24 +82,24 @@ void Panel::setBoxColor(uint16_t left, uint16_t right, uint16_t top, uint16_t bo
 /*
  *   COLUMN AND ROW SETTERS
  */
-void Panel::setColumnColor(uint16_t x, uint8_t r, uint8_t g, uint8_t b) {
-  setColumnColor(x, Color(r, g, b));
+void Panel::setColumnColor(uint16_t y, uint8_t r, uint8_t g, uint8_t b) {
+  setColumnColor(y, Color(r, g, b));
 }
 
-void Panel::setColumnColor(uint16_t x, uint32_t c) {
-  uint8_t index = column_to_strip(x);
-  uint8_t strip_x = x - column_starts[index];
-  wrappers[index].setColumnColor(strip_x, c);
+void Panel::setColumnColor(uint16_t y, uint32_t c) {
+  uint8_t index = column_to_wrapper(y);
+  uint8_t strip_y = y - column_starts[index];
+  wrappers[index].setColumnColor(strip_y, c);
 }
 
-void Panel::setRowColor(uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
-  setRowColor(y, Color(r, g, b));
+void Panel::setRowColor(uint8_t x, uint8_t r, uint8_t g, uint8_t b) {
+  setRowColor(x, Color(r, g, b));
 }
 
-void Panel::setRowColor(uint8_t y, uint32_t c) {
-  for(uint8_t i=0; i < strip_count; i++)
+void Panel::setRowColor(uint8_t x, uint32_t c) {
+  for(uint8_t i=0; i < wrapper_count; i++)
   {
-    wrappers[i].setRowColor(y, c);
+    wrappers[i].setRowColor(x, c);
   }
 }
 
@@ -111,7 +111,7 @@ void Panel::setPixelColor(uint16_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b
 }
 
 void Panel::setPixelColor(uint16_t x, uint8_t y, uint32_t c) {
-  uint8_t index = column_to_strip(x);
-  uint8_t strip_x = x - column_starts[index];
-  wrappers[index].setPixelColor(strip_x, y, c);
+  uint8_t index = column_to_wrapper(y);
+  uint8_t starts = column_starts[index];
+  wrappers[index].setPixelColor(x, y - starts , c);
 }
