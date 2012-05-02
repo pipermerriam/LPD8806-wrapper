@@ -17,7 +17,7 @@ class Panel {
       setPixelColor(uint16_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b),
       setPixelColor(uint16_t x, uint8_t y, uint32_t c);
     uint16_t 
-      column_to_wrapper(uint16_t y);
+      column_to_wrapper(uint16_t x);
     uint32_t
       Color(byte, byte, byte);
   private:

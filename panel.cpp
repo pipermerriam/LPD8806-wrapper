@@ -24,12 +24,12 @@ uint32_t Panel::Color(byte r, byte g, byte b) {
   return 0x808080 | ((uint32_t)g << 16) | ((uint32_t)r << 8) | (uint32_t)b;
 }
 
-uint16_t Panel::column_to_wrapper(uint16_t y) {
+uint16_t Panel::column_to_wrapper(uint16_t x) {
   // Takes a cartesian x, y coordinate (eas:???) and returns the strip wrapper which
   // contains that corrdinate
   for (int i=0; i < wrapper_count; i++)
   {
-    if ( y < (column_starts[i] + wrappers[i].num_columns())) // eas: test this with diff-sized wrappers
+    if ( x < (column_starts[i] + wrappers[i].num_columns())) // eas: test this with diff-sized wrappers
     {
       return i;
     }
@@ -111,7 +111,7 @@ void Panel::setPixelColor(uint16_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b
 }
 
 void Panel::setPixelColor(uint16_t x, uint8_t y, uint32_t c) {
-  uint8_t index = column_to_wrapper(y);
-  uint8_t starts = column_starts[index];
-  wrappers[index].setPixelColor(x, y - starts , c);
+  uint8_t index = column_to_wrapper(x);
+  uint8_t strip_x = x - column_starts[index];
+  wrappers[index].setPixelColor(strip_x, y , c);
 }
