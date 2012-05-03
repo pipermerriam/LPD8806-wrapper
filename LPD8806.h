@@ -35,9 +35,9 @@ class LPD8806 {
  private:
 
   uint16_t
-    numLEDs; // Number of RGB LEDs in strip
+    numLEDs, // Number of RGB LEDs in strip
+    *pixels;
   uint8_t
-    *pixels, // Holds LED color values (3 bytes each)
     clkpin    , datapin,     // Clock & data pin numbers
     clkpinmask, datapinmask; // Clock & data PORT bitmasks
   volatile uint8_t
