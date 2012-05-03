@@ -5,44 +5,25 @@
 /*
  *  CONSTRUCTOR
  */
-StripWrapper::StripWrapper(uint8_t r_size, uint8_t c_size, LPD8806 * s)
-: row_size (r_size),
-  column_size (c_size),
-  strip (s) 
-  { } 
+StripWrapper::StripWrapper(uint8_t r_size, uint8_t c_size, uint8_t dpin, uint8_t cpin)
+  : LPD8806(r_size * c_size, dpin, cpin)
+  { 
+    column_size = c_size;
+    row_size = r_size;
+  } 
+
 /*
  *  UTILITY METHODS
  */
-uint32_t StripWrapper::Color(const byte r, const byte g, const byte b) const {
-  // Take the lowest 7 bits of each value and append them end to end
-  // We have the top bit set high (its a 'parity-like' bit in the protocol
-  // and must be set!)
-  return 0x808080 | ((uint32_t)g << 16) | ((uint32_t)r << 8) | (uint32_t)b;
-}
-
 int StripWrapper::cartesian_to_pixel(const uint16_t x, const uint16_t y) const {
     bool reverse = x % 2;
-    //bool reverse = y % 2;
 
     if ( reverse ) {
       return (x * column_size + (column_size - y - 1));
-      //return (y * column_size + (column_size - x - 1));
     }
     else {
       return (x * column_size + y);
-      //return (y * column_size + x);
     }
-}
-
-/*
- *  BEGIN AND SHOW
- */
-void StripWrapper::begin() {
-    (*strip).begin();
-}
-
-void StripWrapper::show() {
-    (*strip).show();
 }
 
 /*
@@ -64,7 +45,7 @@ int StripWrapper::num_pixels() const {
  *  COLUMN AND ROW SETTERS
  */
 void StripWrapper::setColumnColor(const uint16_t x, const uint8_t r, const uint8_t g, const uint8_t b) {
-  setColumnColor(x, Color(r, g, b));
+  setColumnColor(x, LPD8806::Color(r, g, b));
 }
 
 void StripWrapper::setColumnColor(const uint16_t x, const uint32_t c) {
@@ -75,7 +56,7 @@ void StripWrapper::setColumnColor(const uint16_t x, const uint32_t c) {
 }
 
 void StripWrapper::setRowColor(const uint8_t y, const uint8_t r, const uint8_t g, const uint8_t b) {
-  setRowColor(y, Color(r, g, b));
+  setRowColor(y, LPD8806::Color(r, g, b));
 }
 
 void StripWrapper::setRowColor(const uint8_t y, const uint32_t c) {
@@ -89,16 +70,14 @@ void StripWrapper::setRowColor(const uint8_t y, const uint32_t c) {
  *  PIXEL SETTERS
  */
 void StripWrapper::setPixelColor(const uint16_t x, const uint8_t y, const uint8_t r, const uint8_t g, const uint8_t b) {
-  setPixelColor(x, y, Color(r, g, b));
+  setPixelColor(x, y, LPD8806::Color(r, g, b));
 }
 
 void StripWrapper::setPixelColor(const uint16_t x, const uint8_t y, const uint32_t color) {
-  (*strip).setPixelColor(cartesian_to_pixel(x, y), color);
+  LPD8806::setPixelColor(cartesian_to_pixel(x, y), color);
 }
 
-/* eas: find a more efficient way to do this */
 void StripWrapper::clearallpixels() {
-  for (int i=0; i < row_size; i++)
-      setColumnColor(i, 0, 0, 0);
-
+  for (int i=0; i < LPD8806::numPixels() ; i++)
+      LPD8806::setPixelColor(i, 0x000000);
 }

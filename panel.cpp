@@ -4,13 +4,12 @@
 Panel::Panel(uint8_t c, StripWrapper * w) {
   wrapper_count = c;
   wrappers = w;
-  uint16_t column = 0;
+  y_size = w[0].num_rows();
+  x_size = 0;
   for (uint8_t i=0; i < wrapper_count; i++)
   {
-    column_starts[i] = column;
-    column += wrappers[i].num_columns();
+    x_size += wrappers[i].num_columns();
   }
-  column_count = column;
 }
 
 
@@ -24,16 +23,28 @@ uint32_t Panel::Color(byte r, byte g, byte b) {
   return 0x808080 | ((uint32_t)g << 16) | ((uint32_t)r << 8) | (uint32_t)b;
 }
 
-uint16_t Panel::column_to_wrapper(uint16_t x) {
+uint8_t Panel::column_to_wrapper(uint16_t x) {
   // Takes a cartesian x, y coordinate (eas:???) and returns the strip wrapper which
   // contains that corrdinate
-  for (int i=0; i < wrapper_count; i++)
+  uint16_t i, column = 0;
+  for (i=0; i < wrapper_count; i++)
   {
-    if ( x < (column_starts[i] + wrappers[i].num_columns())) // eas: test this with diff-sized wrappers
+    column += wrappers[i].num_columns();
+    if ( x < column )
     {
       return i;
     }
   }
+  // TODO bounds checking
+  return i;
+}
+
+uint8_t Panel::get_wrapper_column(uint8_t index, uint16_t x) {
+  for (uint8_t i=0; i < index; i++)
+  {
+    x -= wrappers[i].num_columns();
+  }
+  return x;
 }
 
 
@@ -58,7 +69,7 @@ void Panel::show(void) {
  *  INFO METHODS
  */
 int Panel::columns(void) {
-  return column_count;
+  return x_size;
 }
 
 /*
@@ -88,7 +99,7 @@ void Panel::setColumnColor(uint16_t x, uint8_t r, uint8_t g, uint8_t b) {
 
 void Panel::setColumnColor(uint16_t x, uint32_t c) {
   uint8_t index = column_to_wrapper(x);
-  uint8_t strip_x = x - column_starts[index];
+  uint8_t strip_x = x - get_wrapper_column(index, x);
   wrappers[index].setColumnColor(strip_x, c);
 }
 
@@ -112,6 +123,6 @@ void Panel::setPixelColor(uint16_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b
 
 void Panel::setPixelColor(uint16_t x, uint8_t y, uint32_t c) {
   uint8_t index = column_to_wrapper(x);
-  uint8_t strip_x = x - column_starts[index];
+  uint8_t strip_x = get_wrapper_column(index, x);
   wrappers[index].setPixelColor(strip_x, y , c);
 }
