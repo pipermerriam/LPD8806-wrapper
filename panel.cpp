@@ -126,3 +126,13 @@ void Panel::setPixelColor(uint16_t x, uint8_t y, uint32_t c) {
   uint8_t strip_x = get_wrapper_column(index, x);
   wrappers[index].setPixelColor(strip_x, y , c);
 }
+
+void Panel::setPixelAverage(uint16_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
+  setPixelAverage(x, y, Color(r, g, b));
+}
+
+void Panel::setPixelAverage(uint16_t x, uint8_t y, uint32_t c) {
+  uint8_t index = column_to_wrapper(x);
+  uint8_t strip_x = get_wrapper_column(index, x);
+  wrappers[index].setPixelAverage(strip_x, y , c);
+}

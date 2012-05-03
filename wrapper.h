@@ -23,6 +23,8 @@ class StripWrapper : public LPD8806 {
       setColumnColor(const uint16_t x, const uint32_t c),
       setPixelColor(const uint16_t x, const uint8_t y, const uint8_t r, const uint8_t g, const uint8_t b),
       setPixelColor(const uint16_t x, const uint8_t y, const uint32_t color),
+      setPixelAverage(const uint16_t x, const uint8_t y, const uint32_t color),
+      setPixelAverage(const uint16_t x, const uint8_t y, const uint8_t r, const uint8_t g, const uint8_t b),
       clearallpixels();
   private:
     int 

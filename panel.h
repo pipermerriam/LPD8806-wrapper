@@ -15,7 +15,9 @@ class Panel {
       setColumnColor(uint16_t x, uint8_t r, uint8_t g, uint8_t b),
       setColumnColor(uint16_t x, uint32_t c),
       setPixelColor(uint16_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b),
-      setPixelColor(uint16_t x, uint8_t y, uint32_t c);
+      setPixelColor(uint16_t x, uint8_t y, uint32_t c),
+      setPixelAverage(uint16_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b),
+      setPixelAverage(uint16_t x, uint8_t y, uint32_t c);
     uint8_t
       column_to_wrapper(uint16_t x),
       get_wrapper_column(uint8_t index, uint16_t x);

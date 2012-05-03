@@ -77,6 +77,23 @@ void StripWrapper::setPixelColor(const uint16_t x, const uint8_t y, const uint32
   LPD8806::setPixelColor(cartesian_to_pixel(x, y), color);
 }
 
+void StripWrapper::setPixelAverage(const uint16_t x, const uint8_t y, const uint8_t r, const uint8_t g, const uint8_t b) {
+  setPixelAverage(x, y, LPD8806::Color(r, g, b));
+}
+
+void StripWrapper::setPixelAverage(const uint16_t x, const uint8_t y, const uint32_t color) {
+  int index = cartesian_to_pixel(x, y); 
+
+  uint32_t current = LPD8806::getPixelColor(index);
+
+  uint8_t g = ((color >> 16 & 0x7f) + (current >> 16 & 0x7f)) / 2;
+  uint8_t r = ((color >> 8 & 0x7f) + (current >> 8 & 0x7f)) / 2;
+  uint8_t b = ((color & 0x7f) + (current & 0x7f)) / 2;
+
+  LPD8806::setPixelColor(index, r, g, b);
+}
+
+
 void StripWrapper::clearallpixels() {
   for (int i=0; i < LPD8806::numPixels() ; i++)
       LPD8806::setPixelColor(i, 0x000000);
