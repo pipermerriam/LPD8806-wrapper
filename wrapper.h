@@ -29,6 +29,6 @@ class StripWrapper : public LPD8806 {
   private:
     int 
       row_size, 
-      column_size;
+      column_size,
 };
 #endif
