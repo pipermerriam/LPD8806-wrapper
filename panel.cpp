@@ -118,7 +118,7 @@ void Panel::setRowColor(uint8_t y, uint32_t c) {
   }
 }
 /*
- *   PIXEL GETTERS
+ *   PIXEL GETTER
  */
 uint32_t Panel::getPixelColor(uint16_t x, uint8_t y) {
   uint8_t index = column_to_wrapper(x);
@@ -143,13 +143,31 @@ void Panel::setPixelAverage(uint16_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t
   setPixelAverage(x, y, Color(r, g, b));
 }
 
+// TODO:  Make these use HSL color averages instead.
 void Panel::setPixelAverage(uint16_t x, uint8_t y, uint32_t c) {
   uint8_t index = column_to_wrapper(x);
   uint8_t strip_x = get_wrapper_column(index, x);
   wrappers[index].setPixelAverage(strip_x, y , c);
 }
 
-// From http://axonflux.com/handy-rgb-to-hsl-and-rgb-to-hsv-color-model-c
+/*
+ *  Wrapper for rgb_to_hsl to allow color inputs.
+ */
+void Panel::color_to_hsl(uint32_t color, float * h, float * s, float * l) {
+  // Don't forget GRB color order
+  uint8_t g = color >> 16 & 0x7f;
+  uint8_t r = color >> 8 & 0x7f;
+  uint8_t b = color & 0x7f;
+
+  rgb_to_hsl(r, g, b, h, s, l);
+}
+
+/*
+ * From http://axonflux.com/handy-rgb-to-hsl-and-rgb-to-hsv-color-model-c
+ *
+ * Converts rgb color values to hsl color values.
+ * http://en.wikipedia.org/wiki/HSL_and_HSV
+ */
 void Panel::rgb_to_hsl(uint8_t r, uint8_t g, uint8_t b, float * h, float * s, float * l) {
   float red = r / 127.0;
   float green = g / 127.0;
@@ -158,12 +176,11 @@ void Panel::rgb_to_hsl(uint8_t r, uint8_t g, uint8_t b, float * h, float * s, fl
   float maximum = max(max(red, green), blue);
   float minimum = min(min(red, green), blue);
   float hue, saturation, lightness = (maximum + minimum) / 2.0;
+  // TODO: Clean this function up to use all pointers for the hsl values.
   // *h, *s, *l = (maximum + minimum) / 2.0;
 
   if ( maximum == minimum )
-  {
     hue = saturation = 0;
-  }
   else
   {
     float d = maximum - minimum;
@@ -179,13 +196,10 @@ void Panel::rgb_to_hsl(uint8_t r, uint8_t g, uint8_t b, float * h, float * s, fl
         hue += 6;
     }
     else if (maximum == green)
-    {
       hue = (blue - red) / d + 2;
-    }
     else if (maximum == blue)
-    {
       hue = (red - green) / d + 4;
-    }
+
     hue /= 6.0;
   }
   *h = hue;
@@ -193,25 +207,44 @@ void Panel::rgb_to_hsl(uint8_t r, uint8_t g, uint8_t b, float * h, float * s, fl
   *l = lightness;
 }
 
-// from https://github.com/ratkins/RGBConverter/
-void Panel::hsl_to_rgb(float h, float s, float l, uint8_t * red, uint8_t * green, uint8_t * blue) {
-    double r, g, b;
 
-    if (s == 0) {
-        r = g = b = l; // achromatic
-    } else {
-        double q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-        double p = 2 * l - q;
-        r = Panel::hue2rgb(p, q, h + 1/3.0);
-        g = Panel::hue2rgb(p, q, h);
-        b = Panel::hue2rgb(p, q, h - 1/3.0);
-    }
+/*
+ *  Wrapper for hsl_to_rgb to return a full color;
+ */
+uint32_t Panel::hsl_to_color(float h, float s, float l) {
+  uint8_t r, g, b;
 
-    *red = r * 127;
-    *green = g * 127;
-    *blue = b * 127;
+  hsl_to_rgb(h, s, l, &r, &g, &b);
+
+  return Color(r, g, b);
 }
 
+/*
+ * from https://github.com/ratkins/RGBConverter/
+ *
+ * Converts a color in HSL to RGB;
+ *
+ * TODO:  Check if we need doubles here.
+ */
+void Panel::hsl_to_rgb(float h, float s, float l, uint8_t * red, uint8_t * green, uint8_t * blue) {
+  double r, g, b;
+
+  if (s == 0) {
+      r = g = b = l; // achromatic
+  } else {
+      double q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      double p = 2 * l - q;
+      r = Panel::hue2rgb(p, q, h + 1/3.0);
+      g = Panel::hue2rgb(p, q, h);
+      b = Panel::hue2rgb(p, q, h - 1/3.0);
+  }
+
+  *red = r * 127;
+  *green = g * 127;
+  *blue = b * 127;
+}
+
+// TODO:  Do we need doubles here? save some memory....
 double Panel::hue2rgb(double p, double q, float t) {
   if(t < 0) t += 1;
   if(t > 1) t -= 1;

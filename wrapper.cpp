@@ -84,6 +84,9 @@ void StripWrapper::setPixelColor(const uint16_t x, const uint8_t y, const uint32
   LPD8806::setPixelColor(cartesian_to_pixel(x, y), color);
 }
 
+/*
+ *  TODO: HSL colors instead of RGB colors. (from panel class)
+ */
 void StripWrapper::setPixelAverage(const uint16_t x, const uint8_t y, const uint8_t r, const uint8_t g, const uint8_t b) {
   setPixelAverage(x, y, LPD8806::Color(r, g, b));
 }
@@ -101,6 +104,9 @@ void StripWrapper::setPixelAverage(const uint16_t x, const uint8_t y, const uint
 }
 
 
+/*
+ *  Turns all pixels to off.
+ */
 void StripWrapper::clearallpixels() {
   for (int i=0; i < LPD8806::numPixels() ; i++)
       LPD8806::setPixelColor(i, 0x000000);
