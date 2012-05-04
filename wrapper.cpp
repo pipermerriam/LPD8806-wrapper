@@ -67,6 +67,13 @@ void StripWrapper::setRowColor(const uint8_t y, const uint32_t c) {
 }
 
 /*
+ *  PIXEL GETTERS
+ */
+uint32_t StripWrapper::getPixelColor(uint16_t x, uint8_t y) {
+  LPD8806::getPixelColor(cartesian_to_pixel(x, y));
+}
+
+/*
  *  PIXEL SETTERS
  */
 void StripWrapper::setPixelColor(const uint16_t x, const uint8_t y, const uint8_t r, const uint8_t g, const uint8_t b) {

@@ -4,7 +4,8 @@ class Panel {
   public:
     Panel(uint8_t strip_count, StripWrapper * w);
     int
-      columns(void);
+      columns(void),
+      rows(void);
     void
       begin(void),
       show(void),
@@ -18,12 +19,15 @@ class Panel {
       setPixelColor(uint16_t x, uint8_t y, uint32_t c),
       setPixelAverage(uint16_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b),
       setPixelAverage(uint16_t x, uint8_t y, uint32_t c),
-      rgb_to_hsl(uint8_t red, uint8_t green, uint8_t blue, float * h, float * s, float * l),
+      rgb_to_hsl(uint8_t r, uint8_t g, uint8_t b, float * h, float * s, float * l),
       hsl_to_rgb(float h, float s, float l, uint8_t * red, uint8_t * green, uint8_t * blue);
+    double
+      hue2rgb(double p, double q, float t);
     uint8_t
       column_to_wrapper(uint16_t x),
       get_wrapper_column(uint8_t index, uint16_t x);
     uint32_t
+      getPixelColor(uint16_t x, uint8_t y),
       Color(byte, byte, byte);
   private:
     StripWrapper * wrappers;

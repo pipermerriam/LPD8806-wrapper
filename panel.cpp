@@ -72,6 +72,10 @@ int Panel::columns(void) {
   return x_size;
 }
 
+int Panel::rows(void) {
+  return y_size;
+}
+
 /*
  *  BOX SETTER
  */
@@ -113,6 +117,14 @@ void Panel::setRowColor(uint8_t y, uint32_t c) {
     wrappers[i].setRowColor(y, c);
   }
 }
+/*
+ *   PIXEL GETTERS
+ */
+uint32_t Panel::getPixelColor(uint16_t x, uint8_t y) {
+  uint8_t index = column_to_wrapper(x);
+  uint8_t strip_x = get_wrapper_column(index, x);
+  wrappers[index].getPixelColor(strip_x, y);
+}
 
 /*
  *   PIXEL SETTERS
@@ -138,7 +150,7 @@ void Panel::setPixelAverage(uint16_t x, uint8_t y, uint32_t c) {
 }
 
 // From http://axonflux.com/handy-rgb-to-hsl-and-rgb-to-hsv-color-model-c
-void Panel::rgb_to_hsl(uint8_t red, uint8_t green, uint8_t blue, float * h, float * s, float * l) {
+void Panel::rgb_to_hsl(uint8_t r, uint8_t g, uint8_t b, float * h, float * s, float * l) {
   float red = r / 127.0;
   float green = g / 127.0;
   float blue = b / 127.0;
@@ -148,31 +160,31 @@ void Panel::rgb_to_hsl(uint8_t red, uint8_t green, uint8_t blue, float * h, floa
   float hue, saturation, lightness = (maximum + minimum) / 2.0;
   // *h, *s, *l = (maximum + minimum) / 2.0;
 
-  if ( max == min )
+  if ( maximum == minimum )
   {
     hue = saturation = 0;
   }
   else
   {
-    float d = max - min;
+    float d = maximum - minimum;
     if ( lightness > 0.5 )
       saturation = d / (2 - maximum - minimum);
     else
       saturation = d / (maximum + minimum);
 
-    switch ( maximum )
+    if (maximum == red)
     {
-      case red:
-        hue = (green - blue) / d;
-        if ( green < blue )
-          hue += 6;
-        break;
-      case green:
-        hue = (blue - red) / d + 2;
-        break;
-      case blue:
-        hue = (red - green) / d + 4;
-        break;
+      hue = (green - blue) / d;
+      if ( green < blue )
+        hue += 6;
+    }
+    else if (maximum == green)
+    {
+      hue = (blue - red) / d + 2;
+    }
+    else if (maximum == blue)
+    {
+      hue = (red - green) / d + 4;
     }
     hue /= 6.0;
   }
@@ -181,57 +193,30 @@ void Panel::rgb_to_hsl(uint8_t red, uint8_t green, uint8_t blue, float * h, floa
   (*l) = lightness;
 }
 
-// From http://eduardofv.com/read_post/179-Arduino-RGB-LED-HSV-Color-Wheel-
+// from https://github.com/ratkins/RGBConverter/
 void Panel::hsl_to_rgb(float h, float s, float l, uint8_t * red, uint8_t * green, uint8_t * blue) {
-  //this is the algorithm to convert from RGB to HSV
-  double r=0; 
-  double g=0; 
-  double b=0;
+    double r, g, b;
 
-  double hf=h/60.0;
+    if (s == 0) {
+        r = g = b = l; // achromatic
+    } else {
+        double q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        double p = 2 * l - q;
+        r = Panel::hue2rgb(p, q, h + 1/3.0);
+        g = Panel::hue2rgb(p, q, h);
+        b = Panel::hue2rgb(p, q, h - 1/3.0);
+    }
 
-  int i=(int)floor(h/60.0);
-  double f = h/60.0 - i;
-  double pv = v * (1 - s);
-  double qv = v * (1 - s*f);
-  double tv = v * (1 - s * (1 - f));
+    *red = r * 127;
+    *green = g * 127;
+    *blue = b * 127;
+}
 
-  switch (i)
-  {
-  case 0: //rojo dominante
-    r = v;
-    g = tv;
-    b = pv;
-    break;
-  case 1: //verde
-    r = qv;
-    g = v;
-    b = pv;
-    break;
-  case 2: 
-    r = pv;
-    g = v;
-    b = tv;
-    break;
-  case 3: //azul
-    r = pv;
-    g = qv;
-    b = v;
-    break;
-  case 4:
-    r = tv;
-    g = pv;
-    b = v;
-    break;
-  case 5: //rojo
-    r = v;
-    g = pv;
-    b = qv;
-    break;
-  }
-
-  //set each component to a integer value between 0 and 127
-  *red = constrain((int)127*r,0,127);
-  *green = constrain((int)127*g,0,127);
-  *blue = constrain((int)127*b,0,127);
+double Panel::hue2rgb(double p, double q, float t) {
+  if(t < 0) t += 1;
+  if(t > 1) t -= 1;
+  if(t < 1/6.0) return p + (q - p) * 6 * t;
+  if(t < 1/2.0) return q;
+  if(t < 2/3.0) return p + (q - p) * (2/3.0 - t) * 6;
+  return p;
 }
