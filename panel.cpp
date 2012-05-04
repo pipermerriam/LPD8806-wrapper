@@ -188,9 +188,9 @@ void Panel::rgb_to_hsl(uint8_t r, uint8_t g, uint8_t b, float * h, float * s, fl
     }
     hue /= 6.0;
   }
-  (*h) = hue;
-  (*s) = saturation;
-  (*l) = lightness;
+  *h = hue;
+  *s = saturation;
+  *l = lightness;
 }
 
 // from https://github.com/ratkins/RGBConverter/
