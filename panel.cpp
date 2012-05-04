@@ -136,3 +136,102 @@ void Panel::setPixelAverage(uint16_t x, uint8_t y, uint32_t c) {
   uint8_t strip_x = get_wrapper_column(index, x);
   wrappers[index].setPixelAverage(strip_x, y , c);
 }
+
+// From http://axonflux.com/handy-rgb-to-hsl-and-rgb-to-hsv-color-model-c
+void Panel::rgb_to_hsl(uint8_t red, uint8_t green, uint8_t blue, float * h, float * s, float * l) {
+  float red = r / 127.0;
+  float green = g / 127.0;
+  float blue = b / 127.0;
+  
+  float maximum = max(max(red, green), blue);
+  float minimum = min(min(red, green), blue);
+  float hue, saturation, lightness = (maximum + minimum) / 2.0;
+  // *h, *s, *l = (maximum + minimum) / 2.0;
+
+  if ( max == min )
+  {
+    hue = saturation = 0;
+  }
+  else
+  {
+    float d = max - min;
+    if ( lightness > 0.5 )
+      saturation = d / (2 - maximum - minimum);
+    else
+      saturation = d / (maximum + minimum);
+
+    switch ( maximum )
+    {
+      case red:
+        hue = (green - blue) / d;
+        if ( green < blue )
+          hue += 6;
+        break;
+      case green:
+        hue = (blue - red) / d + 2;
+        break;
+      case blue:
+        hue = (red - green) / d + 4;
+        break;
+    }
+    hue /= 6.0;
+  }
+  (*h) = hue;
+  (*s) = saturation;
+  (*l) = lightness;
+}
+
+// From http://eduardofv.com/read_post/179-Arduino-RGB-LED-HSV-Color-Wheel-
+void Panel::hsl_to_rgb(float h, float s, float l, uint8_t * red, uint8_t * green, uint8_t * blue) {
+  //this is the algorithm to convert from RGB to HSV
+  double r=0; 
+  double g=0; 
+  double b=0;
+
+  double hf=h/60.0;
+
+  int i=(int)floor(h/60.0);
+  double f = h/60.0 - i;
+  double pv = v * (1 - s);
+  double qv = v * (1 - s*f);
+  double tv = v * (1 - s * (1 - f));
+
+  switch (i)
+  {
+  case 0: //rojo dominante
+    r = v;
+    g = tv;
+    b = pv;
+    break;
+  case 1: //verde
+    r = qv;
+    g = v;
+    b = pv;
+    break;
+  case 2: 
+    r = pv;
+    g = v;
+    b = tv;
+    break;
+  case 3: //azul
+    r = pv;
+    g = qv;
+    b = v;
+    break;
+  case 4:
+    r = tv;
+    g = pv;
+    b = v;
+    break;
+  case 5: //rojo
+    r = v;
+    g = pv;
+    b = qv;
+    break;
+  }
+
+  //set each component to a integer value between 0 and 127
+  *red = constrain((int)127*r,0,127);
+  *green = constrain((int)127*g,0,127);
+  *blue = constrain((int)127*b,0,127);
+}
