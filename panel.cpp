@@ -42,7 +42,7 @@ uint8_t Panel::column_to_wrapper(uint16_t x) {
 uint8_t Panel::get_wrapper_column(uint8_t index, uint16_t x) {
   for (uint8_t i=0; i < index; i++)
   {
-    x -= wrappers[i].num_columns();
+   x -= wrappers[i].num_columns();
   }
   return x;
 }
@@ -98,8 +98,8 @@ void Panel::setColumnColor(uint16_t x, uint8_t r, uint8_t g, uint8_t b) {
 }
 
 void Panel::setColumnColor(uint16_t x, uint32_t c) {
-  uint8_t index = column_to_wrapper(x);
-  uint8_t strip_x = x - get_wrapper_column(index, x);
+  uint8_t index = column_to_wrapper(x);            // First, figure out which wrapper 
+  uint8_t strip_x = get_wrapper_column(index, x);  // Next, figure out index into that wrapper
   wrappers[index].setColumnColor(strip_x, c);
 }
 
