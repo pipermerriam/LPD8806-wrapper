@@ -1,5 +1,7 @@
 #include "panel.h"
 
+#define DEFAULT_STEPS 64
+
 /*****************************************************************************/
 Panel::Panel(uint8_t c, StripWrapper * w) {
   wrapper_count = c;
@@ -161,6 +163,48 @@ void Panel::color_to_hsl(uint32_t color, float * h, float * s, float * l) {
 
   rgb_to_hsl(r, g, b, h, s, l);
 }
+
+/*
+ * Color Averaging
+ *
+ * Uses the HSL color to compute the appropriate average of two colors.  Called
+ * with only two colors it will compute the true average of the two.  Given a
+ * step value and a total value, the function will compute a weighted average.
+ *
+ * # Example color_average(0x7f0000, 0x000000, 2, 8)
+ *
+ * This would compute the average between full green and all off, giving the
+ * green value a weight of 6, and the off value a weight of 2.
+ *
+ * The weighted average allows you to step through color fades in a very
+ * controlled manner.
+ *
+ */
+uint32_t Panel::color_average(uint32_t current, uint32_t target) {
+  color_average(current, target, 1, 2);
+}
+
+uint32_t Panel::color_average(uint32_t current, uint32_t target, uint32_t step) {
+  color_average(current, target, step, DEFAULT_STEPS);
+}
+
+uint32_t Panel::color_average(uint32_t current, uint32_t target, uint16_t step, uint16_t total) {
+  float current_h, current_s, current_l;
+  float target_h, target_s, target_l;
+
+  color_to_hsl(current, &current_h, &current_s, &current_l);
+  color_to_hsl(target, &target_h, &target_s, &target_l);
+
+  current_h += (target_h - current_h)/(total-step);
+  current_s += (target_s - current_s)/(total-step);
+  current_l += (target_l - current_l)/(total-step);
+
+  return hsl_to_color(current_h, current_s, current_l);
+}
+
+//
+//  Color Converters
+//
 
 /*
  * From http://axonflux.com/handy-rgb-to-hsl-and-rgb-to-hsv-color-model-c

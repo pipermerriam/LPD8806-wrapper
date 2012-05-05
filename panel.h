@@ -28,6 +28,9 @@ class Panel {
       column_to_wrapper(uint16_t x),
       get_wrapper_column(uint8_t index, uint16_t x);
     uint32_t
+      color_average(uint32_t current, uint32_t target),
+      color_average(uint32_t current, uint32_t target, uint32_t step),
+      color_average(uint32_t current, uint32_t target, uint16_t step, uint16_t total),
       hsl_to_color(float h, float s, float l),
       getPixelColor(uint16_t x, uint8_t y),
       Color(byte, byte, byte);

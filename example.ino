@@ -7,6 +7,8 @@
 #define ROW_SIZE 6
 #define COLUMN_SIZE 26
 
+#define FADE_FRAMES 64
+
 // Define a strip wrapper, this one a has 6 columns of 26 pixels.  These would
 // be wired in a zig-zag pattern which the wrapper and panel classes abstract
 // into a 2d coordinate plane.
@@ -48,18 +50,31 @@ void setup() {
 
 void loop() {
   pixel_test(RED);
+  pixel_test(ORANGE);
   pixel_test(YELLOW);
   pixel_test(GREEN);
   pixel_test(TEAL);
   pixel_test(BLUE);
   pixel_test(VIOLET);
 
+  pixel_test(ALL_ON);
+  pixel_test(ALL_OFF);
+
+  fade_to_color(RED);
+  fade_to_color(ORANGE);
+  fade_to_color(YELLOW);
+  fade_to_color(GREEN);
+  fade_to_color(TEAL);
+  fade_to_color(BLUE);
+  fade_to_color(VIOLET);
+
+  fade_to_color(ALL_OFF);
+
   fill_rainbow();
   hard_rainbow();
   multi_rainbow();
   rainbow();
   knight_rider();
-  
 }
 
 /*
@@ -77,6 +92,24 @@ void pixel_test(uint32_t color)
   }
 }
 
+/*
+ * Fades the entire strip to a new color across 64 calls to show.
+ */
+void fade_to_color(uint32_t color) {
+  for(int k=0; k < FADE_FRAMES; k++)
+  {
+    for (int y=0; y < panel.rows(); y++)
+    {
+      for (int x=0; x < panel.columns(); x++)
+      {
+        uint32_t current = panel.getPixelColor(x, y);
+
+        panel.setPixelColor(x, y, panel.color_average(current, color, k, FADE_FRAMES));
+      }
+    }
+    panel.show();
+  }
+}
 
 /*
  *  Traces two red pixels up and down the columns of the strip.
