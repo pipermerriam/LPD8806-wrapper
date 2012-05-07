@@ -212,8 +212,11 @@ uint32_t Panel::color_average(uint32_t current, uint32_t target, uint16_t step, 
  * Converts rgb color values to hsl color values.
  * http://en.wikipedia.org/wiki/HSL_and_HSV
  */
-void Panel::rgb_to_hsl(float red, float green, float blue, float * h, float * s, float * l) {
-  red, green, blue /= 127.0;
+//void Panel::rgb_to_hsl(float red, float green, float blue, float * h, float * s, float * l) {
+void Panel::rgb_to_hsl(uint8_t r, uint8_t g, uint8_t b, float * h, float * s, float * l) {
+  float red = r / 127.0;
+  float green = g / 127.0;
+  float blue = b / 127.0;
   
   float maximum = max(max(red, green), blue);
   float minimum = min(min(red, green), blue);
