@@ -1,9 +1,6 @@
-#if (ARDUINO >= 100)
- #include <Arduino.h>
-#else
- #include <WProgram.h>
- #include <pins_arduino.h>
-#endif
+#include <p32xxxx.h>
+#include <pins_arduino.h>
+#include <WProgram.h>
 
 class LPD8806 {
 
@@ -40,7 +37,7 @@ class LPD8806 {
     *pixels, // Holds LED color values (3 bytes each)
     clkpin    , datapin,     // Clock & data pin numbers
     clkpinmask, datapinmask; // Clock & data PORT bitmasks
-  volatile uint8_t
+  volatile uint32_t
     *clkport  , *dataport;   // Clock & data PORT registers
   void
     alloc(uint16_t n),

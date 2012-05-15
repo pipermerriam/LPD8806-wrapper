@@ -1,5 +1,5 @@
-#include "SPI.h"
 #include "LPD8806.h"
+#include <SPI.h>
 
 // Arduino library to control LPD8806-based RGB LED Strips
 // (c) Adafruit industries
@@ -153,8 +153,8 @@ void LPD8806::show(void) {
   // write 24 bits per pixel
   if (hardwareSPI) {
     for (i=0; i<nl3; i++ ) {
-      SPDR = pixels[i];
-      while(!(SPSR & (1<<SPIF)));
+      //SPDR = pixels[i];
+      //while(!(SPSR & (1<<SPIF)));
     }
   } else if(slowmo) {
     for (i=0; i<nl3; i++ ) {
@@ -166,6 +166,7 @@ void LPD8806::show(void) {
       }
     }
   } else {
+      Serial.println(6969);
     for (i=0; i<nl3; i++ ) {
       for (uint8_t bit=0x80; bit; bit >>= 1) {
         if(pixels[i] & bit) *dataport |=  datapinmask;

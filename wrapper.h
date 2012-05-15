@@ -2,7 +2,7 @@
 #define STRIP_WRAPPER
 
 #include "LPD8806.h"
-#include <Arduino.h>
+//#include <Arduino.h>
 
 //#define COLUMN_SIZE 26
 //#define ROW_SIZE 6 
