@@ -1,6 +1,4 @@
 #include <p32xxxx.h>
-#include <pins_arduino.h>
-#include <WProgram.h>
 
 class LPD8806 {
 
@@ -35,7 +33,8 @@ class LPD8806 {
     numLEDs; // Number of RGB LEDs in strip
   uint8_t
     *pixels, // Holds LED color values (3 bytes each)
-    clkpin    , datapin,     // Clock & data pin numbers
+    clkpin    , datapin;     // Clock & data pin numbers
+  uint32_t
     clkpinmask, datapinmask; // Clock & data PORT bitmasks
   volatile uint32_t
     *clkport  , *dataport;   // Clock & data PORT registers

@@ -1,3 +1,4 @@
+#include <p32xxxx.h>
 #include "wrapper.h"
 
 class Panel {

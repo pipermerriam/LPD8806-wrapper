@@ -1,5 +1,5 @@
-#include "LPD8806.h"
 #include <SPI.h>
+#include "LPD8806.h"
 
 // Arduino library to control LPD8806-based RGB LED Strips
 // (c) Adafruit industries
@@ -166,7 +166,6 @@ void LPD8806::show(void) {
       }
     }
   } else {
-      Serial.println(6969);
     for (i=0; i<nl3; i++ ) {
       for (uint8_t bit=0x80; bit; bit >>= 1) {
         if(pixels[i] & bit) *dataport |=  datapinmask;

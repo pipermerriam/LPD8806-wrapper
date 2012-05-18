@@ -1,8 +1,5 @@
-#ifndef STRIP_WRAPPER
-#define STRIP_WRAPPER
-
+#include <p32xxxx.h>
 #include "LPD8806.h"
-//#include <Arduino.h>
 
 //#define COLUMN_SIZE 26
 //#define ROW_SIZE 6 
@@ -33,4 +30,3 @@ class StripWrapper : public LPD8806 {
       row_size, 
       column_size;
 };
-#endif

@@ -1,3 +1,4 @@
+#include <SPI.h>
 #include "panel.h"
 
 #define DEFAULT_STEPS 64
