@@ -1,7 +1,7 @@
 #include <SPI.h>
 #include "panel.h"
 
-#define DEFAULT_STEPS 64
+#define DEFAULT_STEPS 128
 
 /*****************************************************************************/
 Panel::Panel(uint8_t c, StripWrapper * w) {
@@ -86,13 +86,13 @@ void Panel::setBoxColor(uint16_t left, uint16_t right, uint16_t top, uint16_t bo
   setBoxColor(left, right, top, bottom, Color(r, g, b));
 }
 
-void Panel::setBoxColor(uint16_t left, uint16_t right, uint16_t top, uint16_t bottom, uint32_t c) {
+void Panel::setBoxColor(uint16_t left, uint16_t right, uint16_t top, uint16_t bottom, uint32_t color) {
   ///Colors a box bounded by coordinates left, right, top, bottom (inclusive)
   for (uint16_t x=left; x <= right; x++)
   {
     for (uint8_t y=bottom; y <= top; y++)
     {
-      setPixelColor(x, y, c);
+      setPixelColor(x, y, color);
     }
   }
 }
@@ -104,20 +104,20 @@ void Panel::setColumnColor(uint16_t x, uint8_t r, uint8_t g, uint8_t b) {
   setColumnColor(x, Color(r, g, b));
 }
 
-void Panel::setColumnColor(uint16_t x, uint32_t c) {
+void Panel::setColumnColor(uint16_t x, uint32_t color) {
   uint8_t index = column_to_wrapper(x);            // First, figure out which wrapper 
   uint8_t strip_x = get_wrapper_column(index, x);  // Next, figure out index into that wrapper
-  wrappers[index].setColumnColor(strip_x, c);
+  wrappers[index].setColumnColor(strip_x, color);
 }
 
 void Panel::setRowColor(uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
   setRowColor(y, Color(r, g, b));
 }
 
-void Panel::setRowColor(uint8_t y, uint32_t c) {
+void Panel::setRowColor(uint8_t y, uint32_t color) {
   for(uint8_t i=0; i < wrapper_count; i++)
   {
-    wrappers[i].setRowColor(y, c);
+    wrappers[i].setRowColor(y, color);
   }
 }
 /*
@@ -125,6 +125,8 @@ void Panel::setRowColor(uint8_t y, uint32_t c) {
  */
 uint32_t Panel::getPixelColor(uint16_t x, uint8_t y) {
   uint8_t index = column_to_wrapper(x);
+  if ( index >= wrapper_count )
+    return 0x000000;
   uint8_t strip_x = get_wrapper_column(index, x);
   wrappers[index].getPixelColor(strip_x, y);
 }
@@ -136,10 +138,12 @@ void Panel::setPixelColor(uint16_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b
   setPixelColor(x, y, Color(r, g, b));
 }
 
-void Panel::setPixelColor(uint16_t x, uint8_t y, uint32_t c) {
+void Panel::setPixelColor(uint16_t x, uint8_t y, uint32_t color) {
   uint8_t index = column_to_wrapper(x);
+  if ( index >= wrapper_count )
+    return;
   uint8_t strip_x = get_wrapper_column(index, x);
-  wrappers[index].setPixelColor(strip_x, y , c);
+  wrappers[index].setPixelColor(strip_x, y , color);
 }
 
 void Panel::setPixelAverage(uint16_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
@@ -147,16 +151,66 @@ void Panel::setPixelAverage(uint16_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t
 }
 
 // TODO:  Make these use HSL color averages instead.
-void Panel::setPixelAverage(uint16_t x, uint8_t y, uint32_t c) {
+void Panel::setPixelAverage(uint16_t x, uint8_t y, uint32_t color) {
   uint8_t index = column_to_wrapper(x);
   uint8_t strip_x = get_wrapper_column(index, x);
-  wrappers[index].setPixelAverage(strip_x, y , c);
+
+  //uint32_t current = getPixelColor(x, y);
+  wrappers[index].setPixelAverage(strip_x, y , color);
+}
+
+void Panel::setPixelAverage(uint16_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b, uint16_t step) {
+  setPixelAverage(x, y, Color(r, g, b), step);
+}
+
+void Panel::setPixelAverage(uint16_t x, uint8_t y, uint32_t color, uint16_t step) {
+  setPixelAverage(x, y, color, step, DEFAULT_STEPS);
+}
+
+void Panel::setPixelAverage(uint16_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b, uint16_t step, uint16_t total) {
+  setPixelAverage(x, y, Color(r, g, b), step, total);
+}
+
+void Panel::setPixelAverage(uint16_t x, uint8_t y, uint32_t color, uint16_t step, uint16_t total) {
+  setPixelColor(x, y, color_average(getPixelColor(x, y), color, step, total));
+}
+
+
+/*
+ *  Returns a random color
+ */
+uint32_t Panel::random_color(void) {
+  double h = random(0, 1000) / 1000.0;
+  double s = random(800, 1000) / 1000.0;
+  double l = random(400, 600) / 1000.0;
+
+  return hsl_to_color(h, s, l);
+}
+
+uint32_t Panel::random_primary(void) {
+  int i = random(0, 6);
+
+  switch (i)
+  {
+    case 0:
+      return 0x00f700;
+    case 1:
+      return 0x207f00;
+    case 2:
+      return 0x7f7f00;
+    case 3:
+      return 0x7f0000;
+    case 4:
+      return 0x00007f;
+    case 5:
+      return 0x10407f;
+  }
 }
 
 /*
  *  Wrapper for rgb_to_hsl to allow color inputs.
  */
-void Panel::color_to_hsl(uint32_t color, float * h, float * s, float * l) {
+void Panel::color_to_hsl(uint32_t color, double * h, double * s, double * l) {
   // Don't forget GRB color order
   uint8_t g = color >> 16 & 0x7f;
   uint8_t r = color >> 8 & 0x7f;
@@ -185,20 +239,35 @@ uint32_t Panel::color_average(uint32_t current, uint32_t target) {
   color_average(current, target, 1, 2);
 }
 
-uint32_t Panel::color_average(uint32_t current, uint32_t target, uint32_t step) {
+uint32_t Panel::color_average(uint32_t current, uint32_t target, int step) {
   color_average(current, target, step, DEFAULT_STEPS);
 }
 
-uint32_t Panel::color_average(uint32_t current, uint32_t target, uint16_t step, uint16_t total) {
-  float current_h, current_s, current_l;
-  float target_h, target_s, target_l;
+uint32_t Panel::color_average(uint32_t current, uint32_t target, int step, int total) {
+  double current_h, current_s, current_l;
+  double target_h, target_s, target_l;
+
+  // Ensure that we are within our step values
+  step = constrain(step, 1, total);
+  int divisor = total - step + 1;
 
   color_to_hsl(current, &current_h, &current_s, &current_l);
   color_to_hsl(target, &target_h, &target_s, &target_l);
 
-  current_h += (target_h - current_h)/(total-step);
-  current_s += (target_s - current_s)/(total-step);
-  current_l += (target_l - current_l)/(total-step);
+  double h_step = target_h - current_h;
+
+  if ( h_step > 0.5 )
+    h_step -= 1;
+  else if ( h_step < -0.5 )
+    h_step += 1;
+
+  current_h += h_step / divisor;
+
+  current_s += total != step ? (target_s - current_s)/(total-step) : target_s;
+  current_l += total != step ? (target_l - current_l)/(total-step) : target_l;
+
+  //current_s += (target_s - current_s)/(total-step);
+  //current_l += (target_l - current_l)/(total-step);
 
   return hsl_to_color(current_h, current_s, current_l);
 }
@@ -213,15 +282,14 @@ uint32_t Panel::color_average(uint32_t current, uint32_t target, uint16_t step, 
  * Converts rgb color values to hsl color values.
  * http://en.wikipedia.org/wiki/HSL_and_HSV
  */
-//void Panel::rgb_to_hsl(float red, float green, float blue, float * h, float * s, float * l) {
-void Panel::rgb_to_hsl(uint8_t r, uint8_t g, uint8_t b, float * h, float * s, float * l) {
-  float red = r / 127.0;
-  float green = g / 127.0;
-  float blue = b / 127.0;
+void Panel::rgb_to_hsl(uint8_t r, uint8_t g, uint8_t b, double * h, double * s, double * l) {
+  double red = r / 127.0;
+  double green = g / 127.0;
+  double blue = b / 127.0;
   
-  float maximum = max(max(red, green), blue);
-  float minimum = min(min(red, green), blue);
-  float hue, saturation, lightness = (maximum + minimum) / 2.0;
+  double maximum = max(max(red, green), blue);
+  double minimum = min(min(red, green), blue);
+  double hue, saturation, lightness = (maximum + minimum) / 2.0;
   // TODO: Clean this function up to use all pointers for the hsl values.
   // *h, *s, *l = (maximum + minimum) / 2.0;
 
@@ -229,7 +297,7 @@ void Panel::rgb_to_hsl(uint8_t r, uint8_t g, uint8_t b, float * h, float * s, fl
     hue = saturation = 0;
   else
   {
-    float d = maximum - minimum;
+    double d = maximum - minimum;
     if ( lightness > 0.5 )
       saturation = d / (2 - maximum - minimum);
     else
@@ -257,7 +325,7 @@ void Panel::rgb_to_hsl(uint8_t r, uint8_t g, uint8_t b, float * h, float * s, fl
 /*
  *  Wrapper for hsl_to_rgb to return a full color;
  */
-uint32_t Panel::hsl_to_color(float h, float s, float l) {
+uint32_t Panel::hsl_to_color(double h, double s, double l) {
   uint8_t r, g, b;
 
   hsl_to_rgb(h, s, l, &r, &g, &b);
@@ -272,7 +340,7 @@ uint32_t Panel::hsl_to_color(float h, float s, float l) {
  *
  * TODO:  Check if we need doubles here.
  */
-void Panel::hsl_to_rgb(float h, float s, float l, uint8_t * red, uint8_t * green, uint8_t * blue) {
+void Panel::hsl_to_rgb(double h, double s, double l, uint8_t * red, uint8_t * green, uint8_t * blue) {
   double r, g, b;
 
   if (s == 0) {
@@ -291,7 +359,7 @@ void Panel::hsl_to_rgb(float h, float s, float l, uint8_t * red, uint8_t * green
 }
 
 // TODO:  Do we need doubles here? save some memory....
-double Panel::hue2rgb(double p, double q, float t) {
+double Panel::hue2rgb(double p, double q, double t) {
   if(t < 0) t += 1;
   if(t > 1) t -= 1;
   if(t < 1/6.0) return p + (q - p) * 6 * t;
