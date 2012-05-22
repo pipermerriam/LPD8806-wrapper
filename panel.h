@@ -10,6 +10,7 @@ class Panel {
     void
       begin(void),
       show(void),
+      RGB(uint32_t color, uint8_t * r, uint8_t * g, uint8_t * b),
       setBoxColor(uint16_t left, uint16_t right, uint16_t top, uint16_t bottom, uint8_t r, uint8_t g, uint8_t b),
       setBoxColor(uint16_t left, uint16_t right, uint16_t top, uint16_t bottom, uint32_t color),
       setRowColor(uint8_t y, uint8_t r, uint8_t g, uint8_t b),

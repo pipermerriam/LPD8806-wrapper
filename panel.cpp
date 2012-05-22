@@ -26,6 +26,12 @@ uint32_t Panel::Color(byte r, byte g, byte b) {
   return 0x808080 | ((uint32_t)g << 16) | ((uint32_t)r << 8) | (uint32_t)b;
 }
 
+void Panel::RGB(uint32_t color, uint8_t * r, uint8_t * g, uint8_t * b) {
+  *g = color >> 16 & 0x7f;
+  *r = color >> 8 & 0x7f;
+  *b = color & 0x7f;
+}
+
 uint8_t Panel::column_to_wrapper(uint16_t x) {
   // Takes a cartesian x, y coordinate (eas:???) and returns the strip wrapper which
   // contains that corrdinate
@@ -152,11 +158,8 @@ void Panel::setPixelAverage(uint16_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t
 
 // TODO:  Make these use HSL color averages instead.
 void Panel::setPixelAverage(uint16_t x, uint8_t y, uint32_t color) {
-  uint8_t index = column_to_wrapper(x);
-  uint8_t strip_x = get_wrapper_column(index, x);
-
-  //uint32_t current = getPixelColor(x, y);
-  wrappers[index].setPixelAverage(strip_x, y , color);
+  uint32_t current = getPixelColor(x, y);
+  setPixelColor(x, y , color_average(current, color, 1, 2));
 }
 
 void Panel::setPixelAverage(uint16_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b, uint16_t step) {
@@ -181,8 +184,8 @@ void Panel::setPixelAverage(uint16_t x, uint8_t y, uint32_t color, uint16_t step
  */
 uint32_t Panel::random_color(void) {
   double h = random(0, 1000) / 1000.0;
-  double s = random(800, 1000) / 1000.0;
-  double l = random(400, 600) / 1000.0;
+  double s = random(900, 1000) / 1000.0;
+  double l = random(450, 550) / 1000.0;
 
   return hsl_to_color(h, s, l);
 }
@@ -251,6 +254,8 @@ uint32_t Panel::color_average(uint32_t current, uint32_t target, int step, int t
   step = constrain(step, 1, total);
   int divisor = total - step + 1;
 
+  constrain(divisor, 0, total);
+
   color_to_hsl(current, &current_h, &current_s, &current_l);
   color_to_hsl(target, &target_h, &target_s, &target_l);
 
@@ -261,7 +266,20 @@ uint32_t Panel::color_average(uint32_t current, uint32_t target, int step, int t
   else if ( h_step < -0.5 )
     h_step += 1;
 
-  current_h += h_step / divisor;
+  // Ensure that we arn't on the last step, at which point we should just go to
+  // the target
+  if (divisor == 0)
+    current_h = target_h;
+  else if (divisor == total)
+    current_h;
+  else
+    current_h += h_step / divisor;
+
+  // Ensure that our h-value is within bounds
+  if (current_h > 1.0)
+    current_h -= 1;
+  else if (current_h < 0)
+    current_h += 1;
 
   current_s += total != step ? (target_s - current_s)/(total-step) : target_s;
   current_l += total != step ? (target_l - current_l)/(total-step) : target_l;
@@ -353,9 +371,9 @@ void Panel::hsl_to_rgb(double h, double s, double l, uint8_t * red, uint8_t * gr
       b = Panel::hue2rgb(p, q, h - 1/3.0);
   }
 
-  *red = r * 127;
-  *green = g * 127;
-  *blue = b * 127;
+  *red = constrain(r * 127, 0, 127);
+  *green = constrain(g * 127, 0, 127);
+  *blue = constrain(b * 127, 0, 127);
 }
 
 // TODO:  Do we need doubles here? save some memory....
