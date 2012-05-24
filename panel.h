@@ -25,6 +25,7 @@ class Panel {
       setPixelAverage(uint16_t x, uint8_t y, uint32_t color, uint16_t step),
       setPixelAverage(uint16_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b, uint16_t step, uint16_t total),
       setPixelAverage(uint16_t x, uint8_t y, uint32_t color, uint16_t step, uint16_t total),
+      setPixelAverage(uint16_t x, uint8_t y, uint32_t color, uint16_t step, uint16_t total, bool direction),
       color_to_hsl(uint32_t color, double * h, double * s, double * l),
       rgb_to_hsl(uint8_t r, uint8_t g, uint8_t b, double * h, double * s, double * l),
       hsl_to_rgb(double h, double s, double l, uint8_t * red, uint8_t * green, uint8_t * blue);
@@ -37,11 +38,14 @@ class Panel {
       color_average(uint32_t current, uint32_t target),
       color_average(uint32_t current, uint32_t target, int step),
       color_average(uint32_t current, uint32_t target, int step, int total),
+      color_average(uint32_t current, uint32_t target, int step, int total, bool direction),
       random_color(void),
       random_primary(void),
       hsl_to_color(double h, double s, double l),
       getPixelColor(uint16_t x, uint8_t y),
-      Color(byte, byte, byte);
+      Color(byte, byte, byte),
+      SmoothColor(int x, int y),
+      SmoothColor(int x, int y, long x_offset, long y_offset, double z_offset);
   private:
     StripWrapper * wrappers;
     int

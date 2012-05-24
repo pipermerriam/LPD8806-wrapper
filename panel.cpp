@@ -2,6 +2,7 @@
 #include "panel.h"
 
 #define DEFAULT_STEPS 128
+#define SMOOTH_COLOR_SCALE 120.0
 
 /*****************************************************************************/
 Panel::Panel(uint8_t c, StripWrapper * w) {
@@ -26,10 +27,21 @@ uint32_t Panel::Color(byte r, byte g, byte b) {
   return 0x808080 | ((uint32_t)g << 16) | ((uint32_t)r << 8) | (uint32_t)b;
 }
 
+// Turns a 32 bit color value into its RGB components.
 void Panel::RGB(uint32_t color, uint8_t * r, uint8_t * g, uint8_t * b) {
   *g = color >> 16 & 0x7f;
   *r = color >> 8 & 0x7f;
   *b = color & 0x7f;
+}
+
+uint32_t Panel::SmoothColor(int x, int y){
+  return SmoothColor(x, y, 0, 0, 0);
+}
+
+uint32_t Panel::SmoothColor(int x, int y, long x_offset, long y_offset, double z_offset){
+  double z = (sin(sqrt(2) * (x + x_offset) / SMOOTH_COLOR_SCALE) - sin(M_PI * (x + x_offset) / SMOOTH_COLOR_SCALE) + sin(sqrt(3) * (y + y_offset) / SMOOTH_COLOR_SCALE) - sin(M_E * (y + y_offset) / SMOOTH_COLOR_SCALE)) + z_offset;
+  double h = z - (int) z;
+  return hsl_to_color(h, 1.0, 0.5);
 }
 
 uint8_t Panel::column_to_wrapper(uint16_t x) {
@@ -178,6 +190,10 @@ void Panel::setPixelAverage(uint16_t x, uint8_t y, uint32_t color, uint16_t step
   setPixelColor(x, y, color_average(getPixelColor(x, y), color, step, total));
 }
 
+void Panel::setPixelAverage(uint16_t x, uint8_t y, uint32_t color, uint16_t step, uint16_t total, bool direction) {
+  setPixelColor(x, y, color_average(getPixelColor(x, y), color, step, total, direction));
+}
+
 
 /*
  *  Returns a random color
@@ -246,46 +262,62 @@ uint32_t Panel::color_average(uint32_t current, uint32_t target, int step) {
   color_average(current, target, step, DEFAULT_STEPS);
 }
 
+// This method merely determines the shortest direction to fade the color and instructs the fade function to go that direction.
 uint32_t Panel::color_average(uint32_t current, uint32_t target, int step, int total) {
   double current_h, current_s, current_l;
   double target_h, target_s, target_l;
 
-  // Ensure that we are within our step values
-  step = constrain(step, 1, total);
-  int divisor = total - step + 1;
+  color_to_hsl(current, &current_h, &current_s, &current_l);
+  color_to_hsl(target, &target_h, &target_s, &target_l);
 
-  constrain(divisor, 0, total);
+  double diff = current - target;
+
+  bool direction = ((diff > 0 and diff < 0.5) or (diff < 0 and diff > 0.5));
+  return color_average(current, target, step, total, direction);
+}
+
+uint32_t Panel::color_average(uint32_t current, uint32_t target, int step, int total, bool direction) {
+  double current_h, current_s, current_l;
+  double target_h, target_s, target_l;
+
+  // Ensure that we are within our step values
+  step = constrain(step, 0, total);
 
   color_to_hsl(current, &current_h, &current_s, &current_l);
   color_to_hsl(target, &target_h, &target_s, &target_l);
 
-  double h_step = target_h - current_h;
+  double h_step = abs(target_h - current_h);
 
-  if ( h_step > 0.5 )
-    h_step -= 1;
-  else if ( h_step < -0.5 )
-    h_step += 1;
+  if ( !direction )
+    h_step *= -1;
 
   // Ensure that we arn't on the last step, at which point we should just go to
   // the target
-  if (divisor == 0)
+  if (step == total)
+  {
     current_h = target_h;
-  else if (divisor == total)
+    current_s = target_s;
+    current_l = target_l;
+  }
+  else if (step == 0)
+  {
     current_h;
+  }
   else
-    current_h += h_step / divisor;
+  {
+    current_h += h_step / (total - step);
+    current_s += (target_s - current_s)/(total-step);
+    current_l += (target_l - current_l)/(total-step);
+  }
+
+  constrain(current_s, 0.9, 1.0);
+  constrain(current_l, 0.45, 0.55);
 
   // Ensure that our h-value is within bounds
   if (current_h > 1.0)
     current_h -= 1;
   else if (current_h < 0)
     current_h += 1;
-
-  current_s += total != step ? (target_s - current_s)/(total-step) : target_s;
-  current_l += total != step ? (target_l - current_l)/(total-step) : target_l;
-
-  //current_s += (target_s - current_s)/(total-step);
-  //current_l += (target_l - current_l)/(total-step);
 
   return hsl_to_color(current_h, current_s, current_l);
 }
