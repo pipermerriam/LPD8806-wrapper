@@ -58,7 +58,6 @@ void setup() {
   panel.show();
   // This initializes the color field with a suedo random field of color.
   // Otherwise there is some strangeness as it fades into the first frame.
-  //color_gradient(12345, FADE_FRAMES - 1);
 }
 
 
@@ -69,8 +68,8 @@ void loop() {
   static long x = 0;
   static long y = 0;
 
-  long target_x = random(-10000, 10000);
-  long target_y = random(-10000, 10000);
+  long target_x = random(x - 500, x + 500);
+  long target_y = random(y - 500, y + 500);
 
   while (true)
   {
@@ -92,6 +91,7 @@ void loop() {
     else
       break;
     color_gradient(x, y, FADE_FRAMES);
+    delay(25);
   }
 }
 
