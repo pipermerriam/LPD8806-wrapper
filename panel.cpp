@@ -97,20 +97,65 @@ int Panel::rows(void) {
   return y_size;
 }
 
-/*
- *  BOX SETTER
- */
-void Panel::setBoxColor(uint16_t left, uint16_t right, uint16_t top, uint16_t bottom, uint8_t r, uint8_t g, uint8_t b) {
-  setBoxColor(left, right, top, bottom, Color(r, g, b));
+void Panel::darken() {
+  darken(0.05);
 }
 
-void Panel::setBoxColor(uint16_t left, uint16_t right, uint16_t top, uint16_t bottom, uint32_t color) {
-  ///Colors a box bounded by coordinates left, right, top, bottom (inclusive)
-  for (uint16_t x=left; x <= right; x++)
+void Panel::darken(double step) {
+  for(int x=0; x < columns(); x++)
   {
-    for (uint8_t y=bottom; y <= top; y++)
+    for(int y=0; y < rows(); y++)
     {
-      setPixelColor(x, y, color);
+      double h,s,l;
+      long current_color = getPixelColor(x,y); 
+      color_to_hsl(current_color, &h, &s, &l);
+                  
+      l -= step;
+      constrain(l,0,1.0);
+      setPixelColor(x, y, hsl_to_color(h,s,l));
+    }
+  }
+}
+
+/*
+ * Shifters
+ */
+void Panel::shiftLeft() {
+  for(int x=0; x < columns() - 1; x++)
+  {
+    for(int y=0; y < rows(); y++)
+    {
+      setPixelColor(x, y, getPixelColor(x + 1, y));
+    }
+  }
+}
+
+void Panel::shiftRight() {
+  for(int x=columns() - 1; x > 0; x--)
+  {
+    for(int y=0; y < columns() - 1; y++)
+    {
+      setPixelColor(x, y, getPixelColor(x - 1, y));
+    }
+  }
+}
+
+void Panel::shiftDown() {
+  for(int y=0; y < rows() - 1; y++)
+  {
+    for(int x=0; x < columns(); x++)
+    {
+      setPixelColor(x, y, getPixelColor(x, y + 1));
+    }
+  }
+}
+
+void Panel::shiftUp() {
+  for(int y=rows() - 1; y > 0; y--)
+  {
+    for(int x=0; x < columns(); x++)
+    {
+      setPixelColor(x, y, getPixelColor(x, y - 1));
     }
   }
 }
