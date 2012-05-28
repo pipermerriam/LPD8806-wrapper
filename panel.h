@@ -42,6 +42,7 @@ class Panel {
       column_to_wrapper(uint16_t x),
       get_wrapper_column(uint8_t index, uint16_t x);
     uint32_t
+      image_hash(void),
       color_average(uint32_t current, uint32_t target),
       color_average(uint32_t current, uint32_t target, int step),
       color_average(uint32_t current, uint32_t target, int step, int total),

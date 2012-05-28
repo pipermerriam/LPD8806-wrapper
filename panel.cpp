@@ -107,6 +107,19 @@ int Panel::rows(void) {
   return y_size;
 }
 
+// Returns a hash signature of the current pixel colors on the board.
+uint32_t Panel::image_hash(void) {
+  uint32_t hash = 0x000000;
+  for(int x=0; x<columns(); x++)
+  {
+    for(int y=0; y<rows(); y++)
+    {
+      hash ^= getPixelColor(x, y);
+    }
+  }
+  return hash;
+}
+
 /*
  *  Image filters
  */
