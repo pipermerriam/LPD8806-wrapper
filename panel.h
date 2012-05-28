@@ -47,6 +47,7 @@ class Panel {
       random_primary(void),
       hsl_to_color(double h, double s, double l),
       getPixelColor(uint16_t x, uint8_t y),
+      Color(double h, double s, double l),
       Color(byte, byte, byte),
       SmoothColor(int x, int y),
       SmoothColor(int x, int y, long x_offset, long y_offset, double z_offset);

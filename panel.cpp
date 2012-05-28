@@ -27,11 +27,21 @@ uint32_t Panel::Color(byte r, byte g, byte b) {
   return 0x808080 | ((uint32_t)g << 16) | ((uint32_t)r << 8) | (uint32_t)b;
 }
 
+// Wrapper around confusingly named hsl_to_color
+uint32_t Panel::Color(double h, double s, double l) {
+  return hsl_to_color(h, s, l);
+}
+
 // Turns a 32 bit color value into its RGB components.
 void Panel::RGB(uint32_t color, uint8_t * r, uint8_t * g, uint8_t * b) {
   *g = color >> 16 & 0x7f;
   *r = color >> 8 & 0x7f;
   *b = color & 0x7f;
+}
+
+// Wrapper around the hsl_to_rgb
+void Panel::RGB(double h, double s, double l, uint8_t * red, uint8_t * green, uint8_t * blue) {
+  hsl_to_rgb(h, s, l, red, green, blue);
 }
 
 uint32_t Panel::SmoothColor(int x, int y){
@@ -97,10 +107,16 @@ int Panel::rows(void) {
   return y_size;
 }
 
+/*
+ *  Image filters
+ */
+
+// Darkens the entire board by a fixed amount (1/200)
 void Panel::darken() {
-  darken(0.05);
+  darken(0.005);
 }
 
+// Darkens the entire board by whatever step value you provide.
 void Panel::darken(double step) {
   for(int x=0; x < columns(); x++)
   {
@@ -117,9 +133,33 @@ void Panel::darken(double step) {
   }
 }
 
+// Lighten the entire board by a fixed amount (1/200)
+void Panel::lighten() {
+  lighten(0.005);
+}
+
+// Lighten the entire board by whatever step value you provide.
+void Panel::lighten(double step) {
+  for(int x=0; x < columns(); x++)
+  {
+    for(int y=0; y < rows(); y++)
+    {
+      double h,s,l;
+      long current_color = getPixelColor(x,y); 
+      color_to_hsl(current_color, &h, &s, &l);
+                  
+      l += step;
+      constrain(l,0,1.0);
+      setPixelColor(x, y, hsl_to_color(h,s,l));
+    }
+  }
+}
+
 /*
  * Shifters
  */
+
+// Shifts all pixels on the board left one pixel.
 void Panel::shiftLeft() {
   for(int x=0; x < columns() - 1; x++)
   {
@@ -130,6 +170,7 @@ void Panel::shiftLeft() {
   }
 }
 
+// Shifts all pixels on the board right one pixel.
 void Panel::shiftRight() {
   for(int x=columns() - 1; x > 0; x--)
   {
@@ -140,6 +181,7 @@ void Panel::shiftRight() {
   }
 }
 
+// Shifts all pixels on the board down one pixel.
 void Panel::shiftDown() {
   for(int y=0; y < rows() - 1; y++)
   {
@@ -150,6 +192,7 @@ void Panel::shiftDown() {
   }
 }
 
+// Shifts all pixels on the board up one pixel.
 void Panel::shiftUp() {
   for(int y=rows() - 1; y > 0; y--)
   {
@@ -213,7 +256,24 @@ void Panel::setPixelAverage(uint16_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t
   setPixelAverage(x, y, Color(r, g, b));
 }
 
-// TODO:  Make these use HSL color averages instead.
+/*
+ *  Pixel Average Setters.
+ *
+ *  Params:
+ *    x - The x coordinate of the pixel to set
+ *    y - The y coordinate of the pixel to set
+ *    color - The color we are 'averaging' towards.
+ *    step - The step number we are on in our averaging.
+ *    total - The total number of steps we are using to get to our new color.
+ *    direction - The hard coded direction around the color wheel we should take.
+ *      `true` -> Travel up, or clockwise around the HSL color wheel
+ *      `false` -> Travel down, or counter-clockwise around the HSL color wheel.
+ *
+ *    These methods allow you to fade smoothly from the current color on the
+ *    board to whatever new color you'd like across a fixed number of steps.
+ *    Called without the `direction` parameter it will take the shortest path
+ *    around the color wheel.
+ */
 void Panel::setPixelAverage(uint16_t x, uint8_t y, uint32_t color) {
   uint32_t current = getPixelColor(x, y);
   setPixelColor(x, y , color_average(current, color, 1, 2));
@@ -235,14 +295,18 @@ void Panel::setPixelAverage(uint16_t x, uint8_t y, uint32_t color, uint16_t step
   setPixelColor(x, y, color_average(getPixelColor(x, y), color, step, total));
 }
 
+// Allows you to enforce which direction you will travel around the color wheel.
 void Panel::setPixelAverage(uint16_t x, uint8_t y, uint32_t color, uint16_t step, uint16_t total, bool direction) {
   setPixelColor(x, y, color_average(getPixelColor(x, y), color, step, total, direction));
 }
 
 
 /*
- *  Returns a random color
+ *  Returns a random color.
  */
+
+//  Large range of random colors using HSL, constrained to being above 90%
+//  brightness and almost full saturation.
 uint32_t Panel::random_color(void) {
   double h = random(0, 1000) / 1000.0;
   double s = random(900, 1000) / 1000.0;
@@ -251,36 +315,25 @@ uint32_t Panel::random_color(void) {
   return hsl_to_color(h, s, l);
 }
 
+// Returns a random Primary color
 uint32_t Panel::random_primary(void) {
   int i = random(0, 6);
 
   switch (i)
   {
     case 0:
-      return 0x00f700;
+      return 0x00f700; // Red
     case 1:
-      return 0x207f00;
+      return 0x207f00; // Orange
     case 2:
-      return 0x7f7f00;
+      return 0x7f7f00; // Yellow
     case 3:
-      return 0x7f0000;
+      return 0x7f0000; // Green
     case 4:
-      return 0x00007f;
+      return 0x00007f; // Blue
     case 5:
-      return 0x10407f;
+      return 0x10407f; // Purple
   }
-}
-
-/*
- *  Wrapper for rgb_to_hsl to allow color inputs.
- */
-void Panel::color_to_hsl(uint32_t color, double * h, double * s, double * l) {
-  // Don't forget GRB color order
-  uint8_t g = color >> 16 & 0x7f;
-  uint8_t r = color >> 8 & 0x7f;
-  uint8_t b = color & 0x7f;
-
-  rgb_to_hsl(r, g, b, h, s, l);
 }
 
 /*
@@ -416,6 +469,17 @@ void Panel::rgb_to_hsl(uint8_t r, uint8_t g, uint8_t b, double * h, double * s, 
   *l = lightness;
 }
 
+/*
+ *  Wrapper for rgb_to_hsl to allow color inputs.
+ */
+void Panel::color_to_hsl(uint32_t color, double * h, double * s, double * l) {
+  // Don't forget GRB color order
+  uint8_t g = color >> 16 & 0x7f;
+  uint8_t r = color >> 8 & 0x7f;
+  uint8_t b = color & 0x7f;
+
+  rgb_to_hsl(r, g, b, h, s, l);
+}
 
 /*
  *  Wrapper for hsl_to_rgb to return a full color;
@@ -453,7 +517,7 @@ void Panel::hsl_to_rgb(double h, double s, double l, uint8_t * red, uint8_t * gr
   *blue = constrain(b * 127, 0, 127);
 }
 
-// TODO:  Do we need doubles here? save some memory....
+// Helper method for HSL <-> RGB conversion
 double Panel::hue2rgb(double p, double q, double t) {
   if(t < 0) t += 1;
   if(t > 1) t -= 1;
