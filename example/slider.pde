@@ -1,15 +1,10 @@
 #include "SPI.h"
 #include "panel.h"
-#include "math.h"
 
 /*  
  *  This example code smoothly fades the board between a random field of
  *  smoothly faded colors.
  */
-
-// Data and Clock pins for the single LPD8806 strip.
-#define DATA_PIN 8
-#define CLOCK_PIN 9
 
 // The row and column size for the strip we'll be using.
 #define ROW_SIZE 6
@@ -22,16 +17,27 @@
 // Define a strip wrapper, this one a has 6 columns of 26 pixels.  These would
 // be wired in a zig-zag pattern which the wrapper and panel classes abstract
 // into a 2d coordinate plane.
-StripWrapper wrapper(ROW_SIZE, COLUMN_SIZE, DATA_PIN, CLOCK_PIN);
+StripWrapper wrapper1(ROW_SIZE, COLUMN_SIZE, 13, 83);
+StripWrapper wrapper2(ROW_SIZE, COLUMN_SIZE, 12, 82);
+StripWrapper wrapper3(ROW_SIZE, COLUMN_SIZE, 10, 80);
+StripWrapper wrapper4(ROW_SIZE+1, COLUMN_SIZE, 8, 78);
+StripWrapper wrapper5(ROW_SIZE, COLUMN_SIZE, 22, 23);
+StripWrapper wrapper6(ROW_SIZE, COLUMN_SIZE, 30, 31);
+StripWrapper wrapper7(ROW_SIZE, COLUMN_SIZE, 34, 35);
+StripWrapper wrapper8(ROW_SIZE+1, COLUMN_SIZE, 38, 39);
+StripWrapper wrapper9(ROW_SIZE, COLUMN_SIZE, 42, 43);
+StripWrapper wrapper10(ROW_SIZE, COLUMN_SIZE, 46, 47);
+StripWrapper wrapper11(ROW_SIZE, COLUMN_SIZE, 50, 51);
+StripWrapper wrapper12(ROW_SIZE+1, COLUMN_SIZE, 52, 53);
 
 // Initialize an array of wrappers (singular in this example) for use in
 // initializing our panel class.
-StripWrapper wrappers[] = {wrapper};
+StripWrapper wrappers[] = {wrapper1, wrapper2, wrapper3, wrapper4, wrapper5, wrapper6, wrapper7, wrapper8, wrapper9, wrapper10, wrapper11, wrapper12};
 
 // Initialize our panel class which is capable of abstracting multiple wrapper
 // classes in such a way that you can write to them as a single coordinate
 // plane.
-Panel panel(1, wrappers);
+Panel panel(12, wrappers);
 
 // ON AND OFF CONSTANTS
 #define ALL_OFF 0x808080
