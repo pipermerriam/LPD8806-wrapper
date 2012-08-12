@@ -1,5 +1,3 @@
-#include <p32xxxx.h>
-
 class LPD8806 {
 
  public:
